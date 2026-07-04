@@ -24,6 +24,7 @@ import { getCountryByCode } from '@/data/countries';
 import { getPriceRate } from '@/data/priceRates';
 import { t } from '@/data/translations';
 import { getPendingWorkTypeId, setPendingWorkTypeId } from '@/utils/calcStore';
+import { getSavedPrice, setSavedPrice, deleteSavedPrice } from '@/utils/savedPrices';
 import { printWycena } from '@/utils/printWycena';
 import type { WycenaPosition } from '@/types';
 
@@ -58,6 +59,8 @@ export default function CalculatorScreen() {
   const [dim2, setDim2]                 = useState('');
   const [area, setArea]                 = useState('');
   const [price, setPrice]               = useState('');
+  // Saved price for the current work type (null = never saved by user)
+  const [savedPriceForWT, setSavedPriceForWT] = useState<number | null>(null);
 
   const pendingWT = pendingWTId ? getWorkTypeById(pendingWTId) : null;
   const rate       = pendingWT ? getPriceRate(pendingWT.id, countryCode) : null;
@@ -84,10 +87,17 @@ export default function CalculatorScreen() {
         setPendingWorkTypeId(null);
         setPendingWTId(pending);
         setDim1(''); setDim2(''); setArea('');
-        const r = getPriceRate(pending, countryCode);
-        setPrice(r ? r.avg.toString() : '');
         setSavedWycena(null);
+        // Stale-request guard: ignore result if focus cycled again before promise resolved
+        let cancelled = false;
+        getSavedPrice(pending).then((saved) => {
+          if (cancelled) return;
+          setSavedPriceForWT(saved);
+          const r = getPriceRate(pending, countryCode);
+          setPrice(saved != null ? saved.toString() : (r ? r.avg.toString() : ''));
+        });
         setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 200);
+        return () => { cancelled = true; };
       }
     }, [countryCode]),
   );
@@ -103,6 +113,31 @@ export default function CalculatorScreen() {
   // — Dim labels —
   const dim1Label = pendingWT?.measurementType === 'wall' ? t(language, 'width') : t(language, 'length');
   const dim2Label = pendingWT?.measurementType === 'wall' ? t(language, 'height') : t(language, 'width');
+
+  // — Saved-price helpers —
+  // "Typed" price: what the user actually entered (0 when field is empty).
+  // Distinct from priceNum which falls back to market avg for calculation display.
+  const typedPrice = price.trim() ? (parseFloat(price) || 0) : 0;
+
+  // Rounded integer-cent comparison avoids floating-point artefacts (e.g. 85.00 === 85)
+  const priceIsSaved =
+    savedPriceForWT != null &&
+    typedPrice > 0 &&
+    Math.round(typedPrice * 100) === Math.round(savedPriceForWT * 100);
+
+  const handleSavePrice = async () => {
+    if (!pendingWT || typedPrice <= 0) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    await setSavedPrice(pendingWT.id, typedPrice);
+    setSavedPriceForWT(typedPrice);
+  };
+
+  const handleUnsavePrice = async () => {
+    if (!pendingWT) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await deleteSavedPrice(pendingWT.id);
+    setSavedPriceForWT(null);
+  };
 
   // — Actions —
   const handleAddPosition = () => {
@@ -359,9 +394,19 @@ export default function CalculatorScreen() {
                 </View>
               )}
               <View style={styles.apCol}>
-                <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>
-                  {t(language, 'pricePerUnit').replace('m²', pendingWT.unit)} ({sym})
-                </Text>
+                <View style={styles.priceLabelRow}>
+                  <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>
+                    {t(language, 'pricePerUnit').replace('m²', pendingWT.unit)} ({sym})
+                  </Text>
+                  {savedPriceForWT != null && (
+                    <View style={[styles.savedBadge, { backgroundColor: colors.accent }]}>
+                      <Ionicons name="bookmark" size={10} color={colors.primary} />
+                      <Text style={[styles.savedBadgeText, { color: colors.primary }]}>
+                        zapisana
+                      </Text>
+                    </View>
+                  )}
+                </View>
                 <TextInput
                   value={price} onChangeText={setPrice}
                   keyboardType="decimal-pad" placeholder={rate?.avg.toString() ?? '0'}
@@ -370,6 +415,35 @@ export default function CalculatorScreen() {
                 />
               </View>
             </View>
+
+            {/* Save-price strip — only when user has actually typed a value */}
+            {typedPrice > 0 && (
+              <View style={[styles.savePriceStrip, { borderColor: colors.border }]}>
+                {priceIsSaved ? (
+                  /* Already saved — offer to remove */
+                  <>
+                    <Ionicons name="bookmark" size={14} color={colors.primary} />
+                    <Text style={[styles.savePriceText, { color: colors.primary }]}>
+                      Stawka {typedPrice} {sym}/{pendingWT.unit} zapisana
+                    </Text>
+                    <Pressable onPress={handleUnsavePrice} hitSlop={8} style={styles.unsaveBtn}>
+                      <Text style={[styles.unsaveBtnText, { color: colors.mutedForeground }]}>Usuń</Text>
+                    </Pressable>
+                  </>
+                ) : (
+                  /* Not yet saved — offer to save */
+                  <>
+                    <Ionicons name="bookmark-outline" size={14} color={colors.mutedForeground} />
+                    <Text style={[styles.savePriceText, { color: colors.mutedForeground }]}>
+                      Zapisz {typedPrice} {sym}/{pendingWT.unit} jako moją stawkę
+                    </Text>
+                    <Pressable onPress={handleSavePrice} hitSlop={8} style={[styles.saveBtn2, { backgroundColor: colors.primary }]}>
+                      <Text style={styles.saveBtn2Text}>Zapisz</Text>
+                    </Pressable>
+                  </>
+                )}
+              </View>
+            )}
 
             {/* Row total preview */}
             {areaNum > 0 && (
@@ -537,6 +611,19 @@ const styles = StyleSheet.create({
   apRow:   { flexDirection: 'row', gap: 10 },
   apCol:   { flex: 1, gap: 4 },
   apInput: { height: 48, borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, fontSize: 18, fontFamily: 'Inter_700Bold', textAlign: 'center' },
+
+  // price label row (label + "zapisana" badge)
+  priceLabelRow:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  savedBadge:     { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 5 },
+  savedBadgeText: { fontSize: 10, fontFamily: 'Inter_500Medium' },
+
+  // save-price strip below price input
+  savePriceStrip:  { flexDirection: 'row', alignItems: 'center', gap: 6, paddingTop: 8 },
+  savePriceText:   { flex: 1, fontSize: 12, fontFamily: 'Inter_400Regular' },
+  unsaveBtn:       { paddingHorizontal: 8, paddingVertical: 3 },
+  unsaveBtnText:   { fontSize: 12, fontFamily: 'Inter_500Medium' },
+  saveBtn2:        { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8 },
+  saveBtn2Text:    { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: '#fff' },
 
   rowTotalBar:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, paddingTop: 10, marginTop: -4 },
   rowTotalLabel: { fontSize: 12, fontFamily: 'Inter_400Regular' },
