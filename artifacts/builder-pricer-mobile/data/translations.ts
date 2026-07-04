@@ -37,7 +37,7 @@ type TranslationKeys = {
   companyNamePlaceholder: string; companyAddressPlaceholder: string;
   companyPhonePlaceholder: string; companyEmailPlaceholder: string;
   // Misc
-  clearAll: string; ratesOnline: string;
+  clearAll: string; ratesOnline: string; savedCount: string;
   categories: {
     flooring: string; walls: string; painting: string;
     roofing: string; insulation: string; electrical: string; plumbing: string;
@@ -73,7 +73,7 @@ const translations: Record<Language, TranslationKeys> = {
     companyAddressPlaceholder: 'ul. Przykładowa 1, 00-000 Warszawa',
     companyPhonePlaceholder: '+48 123 456 789',
     companyEmailPlaceholder: 'kontakt@firma.pl',
-    clearAll: 'Wyczyść wszystko', ratesOnline: 'Stawki aktualne (online)',
+    clearAll: 'Wyczyść wszystko', ratesOnline: 'Stawki aktualne (online)', savedCount: 'zapisanych', savedCount: 'zapisanych',
     categories: {
       flooring: 'Podłogi', walls: 'Ściany', painting: 'Malowanie',
       roofing: 'Dach', insulation: 'Ocieplenie', electrical: 'Elektryka', plumbing: 'Hydraulika',
@@ -107,7 +107,7 @@ const translations: Record<Language, TranslationKeys> = {
     companyAddressPlaceholder: '1 Example Street, London',
     companyPhonePlaceholder: '+44 123 456 7890',
     companyEmailPlaceholder: 'contact@company.com',
-    clearAll: 'Clear all', ratesOnline: 'Rates current (online)',
+    clearAll: 'Clear all', ratesOnline: 'Rates current (online)', savedCount: 'saved',
     categories: {
       flooring: 'Flooring', walls: 'Walls', painting: 'Painting',
       roofing: 'Roofing', insulation: 'Insulation', electrical: 'Electrical', plumbing: 'Plumbing',
@@ -141,7 +141,7 @@ const translations: Record<Language, TranslationKeys> = {
     companyAddressPlaceholder: 'Musterstraße 1, 12345 Berlin',
     companyPhonePlaceholder: '+49 123 456789',
     companyEmailPlaceholder: 'info@firma.de',
-    clearAll: 'Alle löschen', ratesOnline: 'Preise aktuell (online)',
+    clearAll: 'Alle löschen', ratesOnline: 'Preise aktuell (online)', savedCount: 'gespeichert',
     categories: {
       flooring: 'Böden', walls: 'Wände', painting: 'Malerei',
       roofing: 'Dach', insulation: 'Dämmung', electrical: 'Elektrik', plumbing: 'Sanitär',
@@ -175,7 +175,7 @@ const translations: Record<Language, TranslationKeys> = {
     companyAddressPlaceholder: '1 rue Exemple, 75001 Paris',
     companyPhonePlaceholder: '+33 1 23 45 67 89',
     companyEmailPlaceholder: 'contact@entreprise.fr',
-    clearAll: 'Tout effacer', ratesOnline: 'Tarifs à jour (en ligne)',
+    clearAll: 'Tout effacer', ratesOnline: 'Tarifs à jour (en ligne)', savedCount: 'enregistrés',
     categories: {
       flooring: 'Sols', walls: 'Murs', painting: 'Peinture',
       roofing: 'Toiture', insulation: 'Isolation', electrical: 'Électricité', plumbing: 'Plomberie',
@@ -209,7 +209,7 @@ const translations: Record<Language, TranslationKeys> = {
     companyAddressPlaceholder: 'вул. Прикладна 1, 01001 Київ',
     companyPhonePlaceholder: '+380 12 345 6789',
     companyEmailPlaceholder: 'info@kompaniya.ua',
-    clearAll: 'Очистити все', ratesOnline: 'Ставки актуальні (онлайн)',
+    clearAll: 'Очистити все', ratesOnline: 'Ставки актуальні (онлайн)', savedCount: 'збережених',
     categories: {
       flooring: 'Підлога', walls: 'Стіни', painting: 'Малярство',
       roofing: 'Покрівля', insulation: 'Утеплення', electrical: 'Електрика', plumbing: 'Сантехніка',
@@ -243,7 +243,7 @@ const translations: Record<Language, TranslationKeys> = {
     companyAddressPlaceholder: 'Calle Ejemplo 1, 28001 Madrid',
     companyPhonePlaceholder: '+34 912 345 678',
     companyEmailPlaceholder: 'info@empresa.es',
-    clearAll: 'Borrar todo', ratesOnline: 'Tarifas actualizadas (online)',
+    clearAll: 'Borrar todo', ratesOnline: 'Tarifas actualizadas (online)', savedCount: 'guardados',
     categories: {
       flooring: 'Suelos', walls: 'Paredes', painting: 'Pintura',
       roofing: 'Tejado', insulation: 'Aislamiento', electrical: 'Electricidad', plumbing: 'Fontanería',
@@ -277,7 +277,7 @@ const translations: Record<Language, TranslationKeys> = {
     companyAddressPlaceholder: 'Příkladní 1, 110 00 Praha',
     companyPhonePlaceholder: '+420 123 456 789',
     companyEmailPlaceholder: 'info@firma.cz',
-    clearAll: 'Vymazat vše', ratesOnline: 'Sazby aktuální (online)',
+    clearAll: 'Vymazat vše', ratesOnline: 'Sazby aktuální (online)', savedCount: 'uložených',
     categories: {
       flooring: 'Podlahy', walls: 'Stěny', painting: 'Malování',
       roofing: 'Střecha', insulation: 'Zateplení', electrical: 'Elektrika', plumbing: 'Instalatérství',

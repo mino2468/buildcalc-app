@@ -6,10 +6,13 @@ import { useColors } from '@/hooks/useColors';
 import type { Estimate } from '@/types';
 import type { Language } from '@/types';
 import { t } from '@/data/translations';
+import { printEstimate } from '@/utils/printEstimate';
+import type { CompanyInfo } from '@/context/CompanyContext';
 
 interface Props {
   estimate: Estimate;
   lang: Language;
+  company: CompanyInfo;
   onDelete: (id: string) => void;
 }
 
@@ -24,17 +27,14 @@ function formatPrice(value: number, currencySymbol: string): string {
 function formatDate(iso: string, lang: Language): string {
   try {
     const d = new Date(iso);
-    return d.toLocaleDateString(lang === 'uk' ? 'uk-UA' : lang === 'cs' ? 'cs-CZ' : lang + '-' + lang.toUpperCase(), {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
+    const locale = lang === 'uk' ? 'uk-UA' : lang === 'cs' ? 'cs-CZ' : `${lang}-${lang.toUpperCase()}`;
+    return d.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
   } catch {
     return iso.slice(0, 10);
   }
 }
 
-export function EstimateCard({ estimate, lang, onDelete }: Props) {
+export function EstimateCard({ estimate, lang, company, onDelete }: Props) {
   const colors = useColors();
 
   const handleDelete = () => {
@@ -55,6 +55,11 @@ export function EstimateCard({ estimate, lang, onDelete }: Props) {
     );
   };
 
+  const handlePrint = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await printEstimate(estimate, company);
+  };
+
   return (
     <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
       <View style={[styles.iconWrap, { backgroundColor: colors.accent }]}>
@@ -73,7 +78,7 @@ export function EstimateCard({ estimate, lang, onDelete }: Props) {
           </Text>
           <Text style={[styles.metaDot, { color: colors.border }]}> · </Text>
           <Text style={[styles.metaText, { color: colors.mutedForeground }]}>
-            {estimate.countryName}
+            {estimate.currencyCode}
           </Text>
           <Text style={[styles.metaDot, { color: colors.border }]}> · </Text>
           <Text style={[styles.metaText, { color: colors.mutedForeground }]}>
@@ -88,6 +93,19 @@ export function EstimateCard({ estimate, lang, onDelete }: Props) {
             {formatPrice(estimate.totalPrice, estimate.currencySymbol)}
           </Text>
         </View>
+        {/* Print button */}
+        <Pressable
+          onPress={handlePrint}
+          style={({ pressed }) => [
+            styles.printBtn,
+            { borderColor: colors.border, opacity: pressed ? 0.6 : 1 },
+          ]}
+        >
+          <Ionicons name="print-outline" size={13} color={colors.mutedForeground} />
+          <Text style={[styles.printBtnText, { color: colors.mutedForeground }]}>
+            {t(lang, 'printEstimate')}
+          </Text>
+        </Pressable>
       </View>
       <Pressable
         onPress={handleDelete}
@@ -102,22 +120,12 @@ export function EstimateCard({ estimate, lang, onDelete }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    padding: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    marginBottom: 10,
-    gap: 12,
+    flexDirection: 'row', alignItems: 'flex-start',
+    padding: 14, borderRadius: 14, borderWidth: 1, marginBottom: 10, gap: 12,
   },
   iconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexShrink: 0,
-    marginTop: 2,
+    width: 44, height: 44, borderRadius: 10,
+    justifyContent: 'center', alignItems: 'center', flexShrink: 0, marginTop: 2,
   },
   content: { flex: 1, gap: 3 },
   label: { fontSize: 11, fontFamily: 'Inter_600SemiBold', textTransform: 'uppercase', letterSpacing: 0.5 },
@@ -128,5 +136,11 @@ const styles = StyleSheet.create({
   priceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
   pricePerUnit: { fontSize: 12, fontFamily: 'Inter_400Regular' },
   total: { fontSize: 17, fontFamily: 'Inter_700Bold' },
+  printBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5,
+    alignSelf: 'flex-start', marginTop: 4,
+  },
+  printBtnText: { fontSize: 11, fontFamily: 'Inter_500Medium' },
   deleteBtn: { paddingTop: 2 },
 });

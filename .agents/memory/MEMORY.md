@@ -1,1 +1,2 @@
 - [BuildCalc mobile architecture](buildcalc-mobile.md) — frontend-only Expo app; calcStore singleton passes work type selection between modal and tab screen.
+- [BuildCalc currency & rates model](buildcalc-currency.md) — Estimate uses currencyCode/currencySymbol (no countryCode); 8 unique currencies; EUR averages across zones; rates fetched from API on launch.
