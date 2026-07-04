@@ -14,32 +14,25 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '@/context/AppContext';
 import { useColors } from '@/hooks/useColors';
 import { LANGUAGES } from '@/data/translations';
+import { LANG_DEFAULT_CURRENCY } from '@/data/currencies';
 import type { Language } from '@/types';
 
 const LANG_COLORS: Record<Language, string> = {
-  pl: '#DC143C',
-  en: '#003399',
-  de: '#000000',
-  fr: '#002395',
-  uk: '#005BBB',
-  es: '#AA151B',
-  cs: '#D7141A',
+  pl: '#DC143C', en: '#003399', de: '#000000',
+  fr: '#002395', uk: '#005BBB', es: '#AA151B', cs: '#D7141A',
 };
 
 export default function LanguageSelectScreen() {
-  const { setLanguage, setCountryCode } = useApp();
+  const { setLanguage, setCurrencyCode } = useApp();
   const colors = useColors();
   const insets = useSafeAreaInsets();
 
   const handleSelect = async (lang: Language) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    // Default country based on language
-    const defaultCountry: Record<Language, string> = {
-      pl: 'PL', en: 'GB', de: 'DE', fr: 'FR', uk: 'UA', es: 'ES', cs: 'CZ',
-    };
+    const defaultCurrency = LANG_DEFAULT_CURRENCY[lang] ?? 'EUR';
     await Promise.all([
       setLanguage(lang),
-      setCountryCode(defaultCountry[lang] ?? 'PL'),
+      setCurrencyCode(defaultCurrency),
     ]);
     router.replace('/(tabs)');
   };
@@ -53,7 +46,6 @@ export default function LanguageSelectScreen() {
         contentContainerStyle={[styles.scroll, { paddingTop: topInset + 32, paddingBottom: 40 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Logo area */}
         <View style={styles.logoArea}>
           <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
             <Text style={styles.logoText}>B</Text>
@@ -64,7 +56,6 @@ export default function LanguageSelectScreen() {
           </Text>
         </View>
 
-        {/* Language grid */}
         <View style={styles.grid}>
           {LANGUAGES.map((lang) => (
             <Pressable
@@ -102,29 +93,16 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: 20 },
   logoArea: { alignItems: 'center', marginBottom: 40 },
   logoCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 14,
-    shadowColor: '#EA580C',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 8,
+    width: 72, height: 72, borderRadius: 20,
+    justifyContent: 'center', alignItems: 'center', marginBottom: 14,
+    shadowColor: '#EA580C', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35, shadowRadius: 12, elevation: 8,
   },
   logoText: { fontSize: 38, fontFamily: 'Inter_700Bold', color: '#fff' },
   appName: { fontSize: 32, fontFamily: 'Inter_700Bold', letterSpacing: -0.5 },
   subtitle: { fontSize: 15, fontFamily: 'Inter_400Regular', marginTop: 6, textAlign: 'center' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  langCard: {
-    width: '47%',
-    padding: 16,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    gap: 8,
-  },
+  langCard: { width: '47%', padding: 16, borderRadius: 14, borderWidth: 1.5, gap: 8 },
   langDot: { width: 20, height: 8, borderRadius: 4 },
   langNative: { fontSize: 18, fontFamily: 'Inter_600SemiBold' },
   langCode: { fontSize: 12, fontFamily: 'Inter_500Medium' },

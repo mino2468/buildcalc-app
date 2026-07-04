@@ -3,44 +3,44 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Language } from '@/types';
 
 const STORAGE_LANG = 'buildcalc_language';
-const STORAGE_COUNTRY = 'buildcalc_country';
+const STORAGE_CURRENCY = 'buildcalc_currency';
 
 interface AppContextValue {
   language: Language;
-  countryCode: string;
+  currencyCode: string;
   isLoading: boolean;
   hasSetLanguage: boolean;
   setLanguage: (lang: Language) => Promise<void>;
-  setCountryCode: (code: string) => Promise<void>;
+  setCurrencyCode: (code: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue>({
   language: 'pl',
-  countryCode: 'PL',
+  currencyCode: 'PLN',
   isLoading: true,
   hasSetLanguage: false,
   setLanguage: async () => {},
-  setCountryCode: async () => {},
+  setCurrencyCode: async () => {},
 });
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [language, setLang] = useState<Language>('pl');
-  const [countryCode, setCountry] = useState('PL');
+  const [currencyCode, setCurrency] = useState('PLN');
   const [isLoading, setIsLoading] = useState(true);
   const [hasSetLanguage, setHasSetLanguage] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
-        const [lang, country] = await Promise.all([
+        const [lang, currency] = await Promise.all([
           AsyncStorage.getItem(STORAGE_LANG),
-          AsyncStorage.getItem(STORAGE_COUNTRY),
+          AsyncStorage.getItem(STORAGE_CURRENCY),
         ]);
         if (lang) {
           setLang(lang as Language);
           setHasSetLanguage(true);
         }
-        if (country) setCountry(country);
+        if (currency) setCurrency(currency);
       } catch (_) {}
       setIsLoading(false);
     })();
@@ -52,13 +52,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem(STORAGE_LANG, lang);
   };
 
-  const setCountryCode = async (code: string) => {
-    setCountry(code);
-    await AsyncStorage.setItem(STORAGE_COUNTRY, code);
+  const setCurrencyCode = async (code: string) => {
+    setCurrency(code);
+    await AsyncStorage.setItem(STORAGE_CURRENCY, code);
   };
 
   return (
-    <AppContext.Provider value={{ language, countryCode, isLoading, hasSetLanguage, setLanguage, setCountryCode }}>
+    <AppContext.Provider value={{ language, currencyCode, isLoading, hasSetLanguage, setLanguage, setCurrencyCode }}>
       {children}
     </AppContext.Provider>
   );

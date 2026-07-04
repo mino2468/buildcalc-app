@@ -1,10 +1,10 @@
-import type { PriceRate } from '@/types';
-import { CURRENCIES } from './currencies';
+import { Router } from "express";
 
-// Price per m² (min, avg, max) in local currency
-// Sources: approximate 2024 European construction market rates
-export let PRICE_RATES: PriceRate[] = [
-  // ── POLAND (PLN) ─────────────────────────────────────────────────────────
+const router = Router();
+
+// Price per m² (min, avg, max) in local currency — 2024–2025 European market estimates
+const PRICE_RATES = [
+  // POLAND (PLN)
   { workTypeId: 'tile-floor',        countryCode: 'PL', min: 55,  avg: 80,  max: 125 },
   { workTypeId: 'hardwood-floor',    countryCode: 'PL', min: 45,  avg: 70,  max: 110 },
   { workTypeId: 'laminate-floor',    countryCode: 'PL', min: 18,  avg: 28,  max: 45  },
@@ -20,8 +20,7 @@ export let PRICE_RATES: PriceRate[] = [
   { workTypeId: 'roof-insulation',   countryCode: 'PL', min: 38,  avg: 62,  max: 100 },
   { workTypeId: 'electrical',        countryCode: 'PL', min: 35,  avg: 55,  max: 88  },
   { workTypeId: 'plumbing',          countryCode: 'PL', min: 75,  avg: 120, max: 185 },
-
-  // ── GERMANY (EUR) ─────────────────────────────────────────────────────────
+  // GERMANY (EUR)
   { workTypeId: 'tile-floor',        countryCode: 'DE', min: 40,  avg: 62,  max: 95  },
   { workTypeId: 'hardwood-floor',    countryCode: 'DE', min: 32,  avg: 55,  max: 88  },
   { workTypeId: 'laminate-floor',    countryCode: 'DE', min: 12,  avg: 22,  max: 38  },
@@ -37,8 +36,7 @@ export let PRICE_RATES: PriceRate[] = [
   { workTypeId: 'roof-insulation',   countryCode: 'DE', min: 30,  avg: 50,  max: 82  },
   { workTypeId: 'electrical',        countryCode: 'DE', min: 28,  avg: 46,  max: 72  },
   { workTypeId: 'plumbing',          countryCode: 'DE', min: 55,  avg: 92,  max: 145 },
-
-  // ── UNITED KINGDOM (GBP) ─────────────────────────────────────────────────
+  // UNITED KINGDOM (GBP)
   { workTypeId: 'tile-floor',        countryCode: 'GB', min: 35,  avg: 55,  max: 88  },
   { workTypeId: 'hardwood-floor',    countryCode: 'GB', min: 28,  avg: 50,  max: 82  },
   { workTypeId: 'laminate-floor',    countryCode: 'GB', min: 10,  avg: 20,  max: 35  },
@@ -54,8 +52,7 @@ export let PRICE_RATES: PriceRate[] = [
   { workTypeId: 'roof-insulation',   countryCode: 'GB', min: 28,  avg: 46,  max: 76  },
   { workTypeId: 'electrical',        countryCode: 'GB', min: 26,  avg: 42,  max: 68  },
   { workTypeId: 'plumbing',          countryCode: 'GB', min: 50,  avg: 85,  max: 135 },
-
-  // ── FRANCE (EUR) ─────────────────────────────────────────────────────────
+  // FRANCE (EUR)
   { workTypeId: 'tile-floor',        countryCode: 'FR', min: 38,  avg: 58,  max: 90  },
   { workTypeId: 'hardwood-floor',    countryCode: 'FR', min: 30,  avg: 52,  max: 84  },
   { workTypeId: 'laminate-floor',    countryCode: 'FR', min: 10,  avg: 20,  max: 35  },
@@ -71,8 +68,7 @@ export let PRICE_RATES: PriceRate[] = [
   { workTypeId: 'roof-insulation',   countryCode: 'FR', min: 28,  avg: 48,  max: 80  },
   { workTypeId: 'electrical',        countryCode: 'FR', min: 25,  avg: 42,  max: 68  },
   { workTypeId: 'plumbing',          countryCode: 'FR', min: 52,  avg: 88,  max: 138 },
-
-  // ── NETHERLANDS (EUR) ─────────────────────────────────────────────────────
+  // NETHERLANDS (EUR)
   { workTypeId: 'tile-floor',        countryCode: 'NL', min: 42,  avg: 66,  max: 100 },
   { workTypeId: 'hardwood-floor',    countryCode: 'NL', min: 35,  avg: 58,  max: 92  },
   { workTypeId: 'laminate-floor',    countryCode: 'NL', min: 12,  avg: 22,  max: 38  },
@@ -88,8 +84,7 @@ export let PRICE_RATES: PriceRate[] = [
   { workTypeId: 'roof-insulation',   countryCode: 'NL', min: 32,  avg: 52,  max: 86  },
   { workTypeId: 'electrical',        countryCode: 'NL', min: 30,  avg: 50,  max: 78  },
   { workTypeId: 'plumbing',          countryCode: 'NL', min: 60,  avg: 98,  max: 155 },
-
-  // ── BELGIUM (EUR) ─────────────────────────────────────────────────────────
+  // BELGIUM (EUR)
   { workTypeId: 'tile-floor',        countryCode: 'BE', min: 38,  avg: 60,  max: 92  },
   { workTypeId: 'hardwood-floor',    countryCode: 'BE', min: 30,  avg: 52,  max: 85  },
   { workTypeId: 'laminate-floor',    countryCode: 'BE', min: 10,  avg: 20,  max: 35  },
@@ -105,8 +100,7 @@ export let PRICE_RATES: PriceRate[] = [
   { workTypeId: 'roof-insulation',   countryCode: 'BE', min: 28,  avg: 48,  max: 80  },
   { workTypeId: 'electrical',        countryCode: 'BE', min: 26,  avg: 44,  max: 70  },
   { workTypeId: 'plumbing',          countryCode: 'BE', min: 52,  avg: 88,  max: 140 },
-
-  // ── AUSTRIA (EUR) ─────────────────────────────────────────────────────────
+  // AUSTRIA (EUR)
   { workTypeId: 'tile-floor',        countryCode: 'AT', min: 42,  avg: 65,  max: 100 },
   { workTypeId: 'hardwood-floor',    countryCode: 'AT', min: 35,  avg: 58,  max: 92  },
   { workTypeId: 'laminate-floor',    countryCode: 'AT', min: 12,  avg: 22,  max: 38  },
@@ -122,8 +116,7 @@ export let PRICE_RATES: PriceRate[] = [
   { workTypeId: 'roof-insulation',   countryCode: 'AT', min: 32,  avg: 52,  max: 84  },
   { workTypeId: 'electrical',        countryCode: 'AT', min: 28,  avg: 46,  max: 74  },
   { workTypeId: 'plumbing',          countryCode: 'AT', min: 56,  avg: 92,  max: 148 },
-
-  // ── SWITZERLAND (CHF) ─────────────────────────────────────────────────────
+  // SWITZERLAND (CHF)
   { workTypeId: 'tile-floor',        countryCode: 'CH', min: 60,  avg: 95,  max: 148 },
   { workTypeId: 'hardwood-floor',    countryCode: 'CH', min: 48,  avg: 80,  max: 130 },
   { workTypeId: 'laminate-floor',    countryCode: 'CH', min: 18,  avg: 32,  max: 55  },
@@ -139,8 +132,7 @@ export let PRICE_RATES: PriceRate[] = [
   { workTypeId: 'roof-insulation',   countryCode: 'CH', min: 46,  avg: 75,  max: 120 },
   { workTypeId: 'electrical',        countryCode: 'CH', min: 42,  avg: 68,  max: 108 },
   { workTypeId: 'plumbing',          countryCode: 'CH', min: 82,  avg: 132, max: 210 },
-
-  // ── CZECH REPUBLIC (CZK) ──────────────────────────────────────────────────
+  // CZECH REPUBLIC (CZK)
   { workTypeId: 'tile-floor',        countryCode: 'CZ', min: 600,  avg: 900,  max: 1400 },
   { workTypeId: 'hardwood-floor',    countryCode: 'CZ', min: 500,  avg: 780,  max: 1250 },
   { workTypeId: 'laminate-floor',    countryCode: 'CZ', min: 200,  avg: 320,  max: 520  },
@@ -156,8 +148,7 @@ export let PRICE_RATES: PriceRate[] = [
   { workTypeId: 'roof-insulation',   countryCode: 'CZ', min: 420,  avg: 680,  max: 1100 },
   { workTypeId: 'electrical',        countryCode: 'CZ', min: 380,  avg: 620,  max: 980  },
   { workTypeId: 'plumbing',          countryCode: 'CZ', min: 850,  avg: 1350, max: 2100 },
-
-  // ── SWEDEN (SEK) ──────────────────────────────────────────────────────────
+  // SWEDEN (SEK)
   { workTypeId: 'tile-floor',        countryCode: 'SE', min: 450,  avg: 700,  max: 1100 },
   { workTypeId: 'hardwood-floor',    countryCode: 'SE', min: 380,  avg: 620,  max: 980  },
   { workTypeId: 'laminate-floor',    countryCode: 'SE', min: 120,  avg: 210,  max: 360  },
@@ -173,8 +164,7 @@ export let PRICE_RATES: PriceRate[] = [
   { workTypeId: 'roof-insulation',   countryCode: 'SE', min: 340,  avg: 540,  max: 860  },
   { workTypeId: 'electrical',        countryCode: 'SE', min: 300,  avg: 490,  max: 780  },
   { workTypeId: 'plumbing',          countryCode: 'SE', min: 640,  avg: 1020, max: 1620 },
-
-  // ── NORWAY (NOK) ──────────────────────────────────────────────────────────
+  // NORWAY (NOK)
   { workTypeId: 'tile-floor',        countryCode: 'NO', min: 550,  avg: 860,  max: 1340 },
   { workTypeId: 'hardwood-floor',    countryCode: 'NO', min: 460,  avg: 750,  max: 1200 },
   { workTypeId: 'laminate-floor',    countryCode: 'NO', min: 150,  avg: 260,  max: 440  },
@@ -190,8 +180,7 @@ export let PRICE_RATES: PriceRate[] = [
   { workTypeId: 'roof-insulation',   countryCode: 'NO', min: 415,  avg: 660,  max: 1050 },
   { workTypeId: 'electrical',        countryCode: 'NO', min: 370,  avg: 600,  max: 950  },
   { workTypeId: 'plumbing',          countryCode: 'NO', min: 780,  avg: 1250, max: 1980 },
-
-  // ── SPAIN (EUR) ───────────────────────────────────────────────────────────
+  // SPAIN (EUR)
   { workTypeId: 'tile-floor',        countryCode: 'ES', min: 30,  avg: 50,  max: 80  },
   { workTypeId: 'hardwood-floor',    countryCode: 'ES', min: 24,  avg: 44,  max: 72  },
   { workTypeId: 'laminate-floor',    countryCode: 'ES', min: 8,   avg: 16,  max: 28  },
@@ -207,8 +196,7 @@ export let PRICE_RATES: PriceRate[] = [
   { workTypeId: 'roof-insulation',   countryCode: 'ES', min: 22,  avg: 36,  max: 60  },
   { workTypeId: 'electrical',        countryCode: 'ES', min: 20,  avg: 34,  max: 55  },
   { workTypeId: 'plumbing',          countryCode: 'ES', min: 42,  avg: 70,  max: 112 },
-
-  // ── UKRAINE (UAH) ─────────────────────────────────────────────────────────
+  // UKRAINE (UAH)
   { workTypeId: 'tile-floor',        countryCode: 'UA', min: 300,  avg: 550,  max: 850  },
   { workTypeId: 'hardwood-floor',    countryCode: 'UA', min: 250,  avg: 450,  max: 720  },
   { workTypeId: 'laminate-floor',    countryCode: 'UA', min: 100,  avg: 180,  max: 300  },
@@ -226,34 +214,8 @@ export let PRICE_RATES: PriceRate[] = [
   { workTypeId: 'plumbing',          countryCode: 'UA', min: 430,  avg: 720,  max: 1140 },
 ];
 
-/** Replace PRICE_RATES with fresh data fetched from the server. */
-export function setRatesFromServer(rates: PriceRate[]) {
-  if (rates && rates.length > 0) PRICE_RATES = rates;
-}
+router.get("/rates", (_req, res) => {
+  res.json({ rates: PRICE_RATES, updatedAt: new Date().toISOString() });
+});
 
-/** Look up rate for a specific country code (internal use). */
-export function getPriceRate(workTypeId: string, countryCode: string): PriceRate | undefined {
-  return PRICE_RATES.find(
-    (r) => r.workTypeId === workTypeId && r.countryCode === countryCode,
-  );
-}
-
-/** Look up rate for a currency — averages across all countries that use it. */
-export function getPriceRateByCurrency(workTypeId: string, currencyCode: string): PriceRate | undefined {
-  const currency = CURRENCIES.find((c) => c.code === currencyCode);
-  if (!currency) return undefined;
-
-  const rates = currency.countryCodes
-    .map((cc) => PRICE_RATES.find((r) => r.workTypeId === workTypeId && r.countryCode === cc))
-    .filter((r): r is PriceRate => r !== undefined);
-
-  if (!rates.length) return undefined;
-
-  return {
-    workTypeId,
-    countryCode: currencyCode,
-    min: Math.round(rates.reduce((s, r) => s + r.min, 0) / rates.length),
-    avg: Math.round(rates.reduce((s, r) => s + r.avg, 0) / rates.length),
-    max: Math.round(rates.reduce((s, r) => s + r.max, 0) / rates.length),
-  };
-}
+export default router;

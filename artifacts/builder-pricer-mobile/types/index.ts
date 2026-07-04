@@ -1,9 +1,12 @@
+export type MeasurementType = 'floor' | 'wall' | 'roof';
+
 export interface WorkType {
   id: string;
   slug: string;
   categorySlug: string;
   unit: string;
   iconName: string;
+  measurementType: MeasurementType;
   translations: Record<string, { name: string; categoryName: string }>;
 }
 
@@ -28,13 +31,11 @@ export interface Estimate {
   workTypeName: string;
   workTypeIconName: string;
   workTypeUnit: string;
-  countryCode: string;
-  countryName: string;
+  currencyCode: string;
+  currencySymbol: string;
   area: number;
   pricePerUnit: number;
   totalPrice: number;
-  currencyCode: string;
-  currencySymbol: string;
   label: string;
   createdAt: string;
 }

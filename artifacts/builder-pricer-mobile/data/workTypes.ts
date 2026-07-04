@@ -1,9 +1,10 @@
-import type { WorkType } from '@/types';
+import type { MeasurementType, WorkType } from '@/types';
 
 export const WORK_TYPES: WorkType[] = [
   // FLOORING
   {
-    id: 'tile-floor', slug: 'tile-floor', categorySlug: 'flooring', unit: 'm²', iconName: 'grid-outline',
+    id: 'tile-floor', slug: 'tile-floor', categorySlug: 'flooring', unit: 'm²',
+    iconName: 'grid-outline', measurementType: 'floor',
     translations: {
       pl: { name: 'Układanie płytek podłogowych', categoryName: 'Podłogi' },
       en: { name: 'Floor tile laying', categoryName: 'Flooring' },
@@ -15,7 +16,8 @@ export const WORK_TYPES: WorkType[] = [
     },
   },
   {
-    id: 'hardwood-floor', slug: 'hardwood-floor', categorySlug: 'flooring', unit: 'm²', iconName: 'reorder-four-outline',
+    id: 'hardwood-floor', slug: 'hardwood-floor', categorySlug: 'flooring', unit: 'm²',
+    iconName: 'reorder-four-outline', measurementType: 'floor',
     translations: {
       pl: { name: 'Układanie parkietu', categoryName: 'Podłogi' },
       en: { name: 'Hardwood floor installation', categoryName: 'Flooring' },
@@ -27,7 +29,8 @@ export const WORK_TYPES: WorkType[] = [
     },
   },
   {
-    id: 'laminate-floor', slug: 'laminate-floor', categorySlug: 'flooring', unit: 'm²', iconName: 'menu-outline',
+    id: 'laminate-floor', slug: 'laminate-floor', categorySlug: 'flooring', unit: 'm²',
+    iconName: 'menu-outline', measurementType: 'floor',
     translations: {
       pl: { name: 'Układanie paneli laminowanych', categoryName: 'Podłogi' },
       en: { name: 'Laminate flooring installation', categoryName: 'Flooring' },
@@ -39,7 +42,8 @@ export const WORK_TYPES: WorkType[] = [
     },
   },
   {
-    id: 'screed', slug: 'screed', categorySlug: 'flooring', unit: 'm²', iconName: 'remove-outline',
+    id: 'screed', slug: 'screed', categorySlug: 'flooring', unit: 'm²',
+    iconName: 'remove-outline', measurementType: 'floor',
     translations: {
       pl: { name: 'Wylewka betonowa / jastrych', categoryName: 'Podłogi' },
       en: { name: 'Concrete screed', categoryName: 'Flooring' },
@@ -52,7 +56,8 @@ export const WORK_TYPES: WorkType[] = [
   },
   // WALLS
   {
-    id: 'wall-tile', slug: 'wall-tile', categorySlug: 'walls', unit: 'm²', iconName: 'apps-outline',
+    id: 'wall-tile', slug: 'wall-tile', categorySlug: 'walls', unit: 'm²',
+    iconName: 'apps-outline', measurementType: 'wall',
     translations: {
       pl: { name: 'Kafelkowanie ścian', categoryName: 'Ściany' },
       en: { name: 'Wall tiling', categoryName: 'Walls' },
@@ -64,7 +69,8 @@ export const WORK_TYPES: WorkType[] = [
     },
   },
   {
-    id: 'plastering', slug: 'plastering', categorySlug: 'walls', unit: 'm²', iconName: 'layers-outline',
+    id: 'plastering', slug: 'plastering', categorySlug: 'walls', unit: 'm²',
+    iconName: 'layers-outline', measurementType: 'wall',
     translations: {
       pl: { name: 'Tynkowanie ścian', categoryName: 'Ściany' },
       en: { name: 'Plastering walls', categoryName: 'Walls' },
@@ -76,7 +82,8 @@ export const WORK_TYPES: WorkType[] = [
     },
   },
   {
-    id: 'drywall', slug: 'drywall', categorySlug: 'walls', unit: 'm²', iconName: 'albums-outline',
+    id: 'drywall', slug: 'drywall', categorySlug: 'walls', unit: 'm²',
+    iconName: 'albums-outline', measurementType: 'wall',
     translations: {
       pl: { name: 'Gipsokartony / sucha zabudowa', categoryName: 'Ściany' },
       en: { name: 'Drywall / plasterboard', categoryName: 'Walls' },
@@ -89,7 +96,8 @@ export const WORK_TYPES: WorkType[] = [
   },
   // PAINTING
   {
-    id: 'interior-painting', slug: 'interior-painting', categorySlug: 'painting', unit: 'm²', iconName: 'color-palette-outline',
+    id: 'interior-painting', slug: 'interior-painting', categorySlug: 'painting', unit: 'm²',
+    iconName: 'color-palette-outline', measurementType: 'wall',
     translations: {
       pl: { name: 'Malowanie wnętrz', categoryName: 'Malowanie' },
       en: { name: 'Interior painting', categoryName: 'Painting' },
@@ -101,7 +109,8 @@ export const WORK_TYPES: WorkType[] = [
     },
   },
   {
-    id: 'exterior-painting', slug: 'exterior-painting', categorySlug: 'painting', unit: 'm²', iconName: 'brush-outline',
+    id: 'exterior-painting', slug: 'exterior-painting', categorySlug: 'painting', unit: 'm²',
+    iconName: 'brush-outline', measurementType: 'wall',
     translations: {
       pl: { name: 'Malowanie elewacji / fasady', categoryName: 'Malowanie' },
       en: { name: 'Exterior / facade painting', categoryName: 'Painting' },
@@ -114,7 +123,8 @@ export const WORK_TYPES: WorkType[] = [
   },
   // ROOFING
   {
-    id: 'roof-tiles', slug: 'roof-tiles', categorySlug: 'roofing', unit: 'm²', iconName: 'triangle-outline',
+    id: 'roof-tiles', slug: 'roof-tiles', categorySlug: 'roofing', unit: 'm²',
+    iconName: 'triangle-outline', measurementType: 'roof',
     translations: {
       pl: { name: 'Krycie dachu dachówką', categoryName: 'Dach' },
       en: { name: 'Roof tile installation', categoryName: 'Roofing' },
@@ -126,7 +136,8 @@ export const WORK_TYPES: WorkType[] = [
     },
   },
   {
-    id: 'metal-roofing', slug: 'metal-roofing', categorySlug: 'roofing', unit: 'm²', iconName: 'radio-button-on-outline',
+    id: 'metal-roofing', slug: 'metal-roofing', categorySlug: 'roofing', unit: 'm²',
+    iconName: 'radio-button-on-outline', measurementType: 'roof',
     translations: {
       pl: { name: 'Blachodachówka / blacha', categoryName: 'Dach' },
       en: { name: 'Metal roofing / sheet metal', categoryName: 'Roofing' },
@@ -139,7 +150,8 @@ export const WORK_TYPES: WorkType[] = [
   },
   // INSULATION
   {
-    id: 'wall-insulation', slug: 'wall-insulation', categorySlug: 'insulation', unit: 'm²', iconName: 'thermometer-outline',
+    id: 'wall-insulation', slug: 'wall-insulation', categorySlug: 'insulation', unit: 'm²',
+    iconName: 'thermometer-outline', measurementType: 'wall',
     translations: {
       pl: { name: 'Ocieplenie ścian / elewacji', categoryName: 'Ocieplenie' },
       en: { name: 'Wall / facade insulation', categoryName: 'Insulation' },
@@ -151,7 +163,8 @@ export const WORK_TYPES: WorkType[] = [
     },
   },
   {
-    id: 'roof-insulation', slug: 'roof-insulation', categorySlug: 'insulation', unit: 'm²', iconName: 'cloudy-outline',
+    id: 'roof-insulation', slug: 'roof-insulation', categorySlug: 'insulation', unit: 'm²',
+    iconName: 'cloudy-outline', measurementType: 'roof',
     translations: {
       pl: { name: 'Ocieplenie dachu / poddasza', categoryName: 'Ocieplenie' },
       en: { name: 'Roof / attic insulation', categoryName: 'Insulation' },
@@ -164,7 +177,8 @@ export const WORK_TYPES: WorkType[] = [
   },
   // ELECTRICAL
   {
-    id: 'electrical', slug: 'electrical', categorySlug: 'electrical', unit: 'm²', iconName: 'flash-outline',
+    id: 'electrical', slug: 'electrical', categorySlug: 'electrical', unit: 'm²',
+    iconName: 'flash-outline', measurementType: 'floor',
     translations: {
       pl: { name: 'Instalacja elektryczna', categoryName: 'Elektryka' },
       en: { name: 'Electrical installation', categoryName: 'Electrical' },
@@ -177,7 +191,8 @@ export const WORK_TYPES: WorkType[] = [
   },
   // PLUMBING
   {
-    id: 'plumbing', slug: 'plumbing', categorySlug: 'plumbing', unit: 'm²', iconName: 'water-outline',
+    id: 'plumbing', slug: 'plumbing', categorySlug: 'plumbing', unit: 'm²',
+    iconName: 'water-outline', measurementType: 'floor',
     translations: {
       pl: { name: 'Instalacja hydrauliczna', categoryName: 'Hydraulika' },
       en: { name: 'Plumbing installation', categoryName: 'Plumbing' },
@@ -194,7 +209,7 @@ export const CATEGORY_ORDER = [
   'flooring', 'walls', 'painting', 'roofing', 'insulation', 'electrical', 'plumbing',
 ];
 
-export function getWorkTypesByCategory(lang: string): Record<string, WorkType[]> {
+export function getWorkTypesByCategory(): Record<string, WorkType[]> {
   const result: Record<string, WorkType[]> = {};
   for (const wt of WORK_TYPES) {
     const cat = wt.categorySlug;
