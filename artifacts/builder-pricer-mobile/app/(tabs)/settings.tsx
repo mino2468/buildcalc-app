@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Platform,
   Pressable,
@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '@/context/AppContext';
 import { useColors } from '@/hooks/useColors';
@@ -18,6 +19,10 @@ import type { Language } from '@/types';
 
 export default function SettingsScreen() {
   const { language, countryCode, setLanguage, setCountryCode } = useApp();
+  const navigation = useNavigation();
+  useEffect(() => {
+    navigation.setOptions({ title: t(language, 'settings') });
+  }, [language]);
   const colors = useColors();
   const insets = useSafeAreaInsets();
 

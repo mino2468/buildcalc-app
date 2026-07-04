@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   FlatList,
   Platform,
@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '@/context/AppContext';
 import { useEstimates } from '@/context/EstimatesContext';
@@ -18,6 +19,10 @@ import { t } from '@/data/translations';
 export default function HistoryScreen() {
   const { language } = useApp();
   const { estimates, removeEstimate, clearAll } = useEstimates();
+  const navigation = useNavigation();
+  useEffect(() => {
+    navigation.setOptions({ title: t(language, 'history') });
+  }, [language]);
   const colors = useColors();
   const insets = useSafeAreaInsets();
 

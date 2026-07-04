@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -12,7 +12,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,6 +31,11 @@ export default function CalculatorScreen() {
   const { addEstimate } = useEstimates();
   const colors = useColors();
   const insets = useSafeAreaInsets();
+
+  const navigation = useNavigation();
+  useEffect(() => {
+    navigation.setOptions({ title: t(language, 'calculator') });
+  }, [language]);
 
   const [workTypeId, setWorkTypeId] = useState<string | null>(null);
   const [area, setArea] = useState('10');
