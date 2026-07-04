@@ -16,7 +16,9 @@
     "ios": {
       "supportsTablet": false
     },
-    "android": {},
+    "android": {
+      "package": "com.mino13579.buildcalc"
+    },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
@@ -27,16 +29,25 @@
           "origin": "https://replit.com/"
         }
       ],
-      ["expo-font", {
-        "fonts": [
-          "./assets/fonts/Ionicons.ttf"
-        ]
-      }],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Ionicons.ttf"
+          ]
+        }
+      ],
       "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "893f8552-552d-441f-9098-dd5330bd4603"
+      }
+    },
+    "owner": "mino13579-2"
   }
 }
