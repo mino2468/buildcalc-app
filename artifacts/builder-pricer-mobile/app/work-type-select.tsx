@@ -19,15 +19,21 @@ import { tCategory, t } from '@/data/translations';
 import { setPendingWorkTypeId } from '@/utils/calcStore';
 import type { WorkType } from '@/types';
 
-// Accent colours per category (index maps to CATEGORY_ORDER)
+// Accent colours per category — maps to CATEGORY_ORDER (13 categories)
 const CAT_COLORS = [
-  '#F97316', // prep     — orange
-  '#84CC16', // plastering — lime
-  '#3B82F6', // painting  — blue
-  '#06B6D4', // tiling    — cyan
-  '#A855F7', // flooring  — purple
-  '#F59E0B', // carpentry — amber
-  '#10B981', // installations — emerald
+  '#F97316', // prep              — orange
+  '#3B82F6', // walls-ceilings    — blue
+  '#8B5CF6', // drywall           — violet
+  '#84CC16', // flooring          — lime
+  '#06B6D4', // tiling            — cyan
+  '#F43F5E', // bathroom          — rose
+  '#F59E0B', // kitchen           — amber
+  '#A855F7', // carpentry         — purple
+  '#EAB308', // electrical        — yellow
+  '#0EA5E9', // plumbing          — sky
+  '#EC4899', // decorative        — pink
+  '#64748B', // assembly          — slate
+  '#6366F1', // finishing         — indigo
 ];
 
 export default function WorkTypeSelectScreen() {

@@ -55,12 +55,15 @@ type TranslationKeys = {
   // linear / count measurement types
   quantity: string;
   categories: {
-    // new categories (ewyceniarka.pl)
-    prep: string; plastering: string; tiling: string; carpentry: string; installations: string;
-    // existing
-    flooring: string; painting: string;
-    // legacy (kept for compat)
-    walls: string; roofing: string; insulation: string; electrical: string; plumbing: string;
+    // current 13-category catalog
+    prep: string; 'walls-ceilings': string; drywall: string;
+    flooring: string; tiling: string;
+    bathroom: string; kitchen: string;
+    carpentry: string; electrical: string; plumbing: string;
+    decorative: string; assembly: string; finishing: string;
+    // legacy (kept for backward compat)
+    plastering: string; painting: string; installations: string;
+    walls: string; roofing: string; insulation: string;
   };
 };
 
@@ -102,12 +105,15 @@ const translations: Record<Language, TranslationKeys> = {
     positions: 'Pozycje', positionCount: 'poz.',
     quantity: 'Ilość',
     categories: {
-      prep: 'Prace przygotowawcze', plastering: 'Tynki i gładzie',
-      painting: 'Malowanie i sufity', tiling: 'Glazurnictwo i flizowanie',
-      flooring: 'Wykończenie podłóg', carpentry: 'Stolarka i montaż',
+      prep: 'Prace przygotowawcze', 'walls-ceilings': 'Ściany i sufity',
+      drywall: 'Zabudowy GK i sufity', flooring: 'Podłogi',
+      tiling: 'Płytki i glazura', bathroom: 'Łazienki', kitchen: 'Kuchnie',
+      carpentry: 'Drzwi i stolarka', electrical: 'Instalacje elektryczne',
+      plumbing: 'Instalacje hydrauliczne', decorative: 'Wykończenia dekoracyjne',
+      assembly: 'Prace montażowe', finishing: 'Prace końcowe',
+      plastering: 'Tynki i gładzie', painting: 'Malowanie i sufity',
       installations: 'Instalacje i biały montaż',
       walls: 'Ściany', roofing: 'Dach', insulation: 'Ocieplenie',
-      electrical: 'Elektryka', plumbing: 'Hydraulika',
     },
   },
   en: {
@@ -147,12 +153,15 @@ const translations: Record<Language, TranslationKeys> = {
     positions: 'Positions', positionCount: 'pos.',
     quantity: 'Quantity',
     categories: {
-      prep: 'Preparation', plastering: 'Plastering',
-      painting: 'Painting & Ceilings', tiling: 'Tiling',
-      flooring: 'Flooring', carpentry: 'Carpentry & Assembly',
+      prep: 'Preparation', 'walls-ceilings': 'Walls & Ceilings',
+      drywall: 'Drywall & Ceilings', flooring: 'Flooring',
+      tiling: 'Tiles & Ceramics', bathroom: 'Bathrooms', kitchen: 'Kitchens',
+      carpentry: 'Doors & Carpentry', electrical: 'Electrical',
+      plumbing: 'Plumbing', decorative: 'Decorative Finishes',
+      assembly: 'Assembly & Fitting', finishing: 'Final Works',
+      plastering: 'Plastering', painting: 'Painting & Ceilings',
       installations: 'Installations',
       walls: 'Walls', roofing: 'Roofing', insulation: 'Insulation',
-      electrical: 'Electrical', plumbing: 'Plumbing',
     },
   },
   de: {
@@ -192,12 +201,15 @@ const translations: Record<Language, TranslationKeys> = {
     positions: 'Positionen', positionCount: 'Pos.',
     quantity: 'Menge',
     categories: {
-      prep: 'Vorbereitung', plastering: 'Verputzen',
-      painting: 'Malen & Decken', tiling: 'Fliesenlegen',
-      flooring: 'Böden', carpentry: 'Schreinerarbeit',
+      prep: 'Vorbereitung', 'walls-ceilings': 'Wände & Decken',
+      drywall: 'Trockenbau & Decken', flooring: 'Böden',
+      tiling: 'Fliesen & Keramik', bathroom: 'Bäder', kitchen: 'Küchen',
+      carpentry: 'Türen & Schreinerarbeit', electrical: 'Elektroinstallation',
+      plumbing: 'Sanitärinstallation', decorative: 'Dekorative Ausführung',
+      assembly: 'Montagearbeiten', finishing: 'Abschlussarbeiten',
+      plastering: 'Verputzen', painting: 'Malen & Decken',
       installations: 'Installationen',
       walls: 'Wände', roofing: 'Dach', insulation: 'Dämmung',
-      electrical: 'Elektrik', plumbing: 'Sanitär',
     },
   },
   fr: {
@@ -237,12 +249,15 @@ const translations: Record<Language, TranslationKeys> = {
     positions: 'Postes', positionCount: 'postes',
     quantity: 'Quantité',
     categories: {
-      prep: 'Préparation', plastering: 'Plâtrerie',
-      painting: 'Peinture & Plafonds', tiling: 'Carrelage',
-      flooring: 'Sols', carpentry: 'Menuiserie',
+      prep: 'Préparation', 'walls-ceilings': 'Murs et Plafonds',
+      drywall: 'Plaques de plâtre', flooring: 'Sols',
+      tiling: 'Carrelage', bathroom: 'Salles de bain', kitchen: 'Cuisines',
+      carpentry: 'Portes et menuiserie', electrical: 'Électricité',
+      plumbing: 'Plomberie', decorative: 'Finitions décoratives',
+      assembly: 'Travaux de pose', finishing: 'Travaux finaux',
+      plastering: 'Plâtrerie', painting: 'Peinture & Plafonds',
       installations: 'Installations',
       walls: 'Murs', roofing: 'Toiture', insulation: 'Isolation',
-      electrical: 'Électricité', plumbing: 'Plomberie',
     },
   },
   uk: {
@@ -282,12 +297,15 @@ const translations: Record<Language, TranslationKeys> = {
     positions: 'Позиції', positionCount: 'поз.',
     quantity: 'Кількість',
     categories: {
-      prep: 'Підготовчі роботи', plastering: 'Штукатурка і шпаклівка',
-      painting: 'Малярство і стелі', tiling: 'Плиткування',
-      flooring: 'Підлога', carpentry: 'Столярка і монтаж',
+      prep: 'Підготовчі роботи', 'walls-ceilings': 'Стіни і стелі',
+      drywall: 'Гіпсокартон і стелі', flooring: 'Підлога',
+      tiling: 'Плитка і кераміка', bathroom: 'Ванні кімнати', kitchen: 'Кухні',
+      carpentry: 'Двері і столярка', electrical: 'Електромонтаж',
+      plumbing: 'Сантехніка', decorative: 'Декоративне оздоблення',
+      assembly: 'Монтажні роботи', finishing: 'Завершальні роботи',
+      plastering: 'Штукатурка і шпаклівка', painting: 'Малярство і стелі',
       installations: 'Інсталяції та монтаж',
       walls: 'Стіни', roofing: 'Покрівля', insulation: 'Утеплення',
-      electrical: 'Електрика', plumbing: 'Сантехніка',
     },
   },
   es: {
@@ -327,12 +345,15 @@ const translations: Record<Language, TranslationKeys> = {
     positions: 'Partidas', positionCount: 'part.',
     quantity: 'Cantidad',
     categories: {
-      prep: 'Preparación', plastering: 'Enlucidos',
-      painting: 'Pintura y Techos', tiling: 'Alicatado',
-      flooring: 'Suelos', carpentry: 'Carpintería',
+      prep: 'Preparación', 'walls-ceilings': 'Paredes y Techos',
+      drywall: 'Pladur y Techos', flooring: 'Suelos',
+      tiling: 'Azulejos y cerámica', bathroom: 'Baños', kitchen: 'Cocinas',
+      carpentry: 'Puertas y carpintería', electrical: 'Electricidad',
+      plumbing: 'Fontanería', decorative: 'Acabados decorativos',
+      assembly: 'Trabajos de montaje', finishing: 'Trabajos finales',
+      plastering: 'Enlucidos', painting: 'Pintura y Techos',
       installations: 'Instalaciones',
       walls: 'Paredes', roofing: 'Tejado', insulation: 'Aislamiento',
-      electrical: 'Electricidad', plumbing: 'Fontanería',
     },
   },
   cs: {
@@ -372,12 +393,15 @@ const translations: Record<Language, TranslationKeys> = {
     positions: 'Položky', positionCount: 'pol.',
     quantity: 'Množství',
     categories: {
-      prep: 'Přípravné práce', plastering: 'Omítky a stěrky',
-      painting: 'Malování a stropy', tiling: 'Obkládání',
-      flooring: 'Podlahy', carpentry: 'Truhlářství a montáž',
+      prep: 'Přípravné práce', 'walls-ceilings': 'Stěny a stropy',
+      drywall: 'Sádrokarton a stropy', flooring: 'Podlahy',
+      tiling: 'Obklady a dlažba', bathroom: 'Koupelny', kitchen: 'Kuchyně',
+      carpentry: 'Dveře a truhlářství', electrical: 'Elektroinstalace',
+      plumbing: 'Instalatérství', decorative: 'Dekorativní povrchy',
+      assembly: 'Montážní práce', finishing: 'Závěrečné práce',
+      plastering: 'Omítky a stěrky', painting: 'Malování a stropy',
       installations: 'Instalace',
       walls: 'Stěny', roofing: 'Střecha', insulation: 'Zateplení',
-      electrical: 'Elektrika', plumbing: 'Instalatérství',
     },
   },
 };

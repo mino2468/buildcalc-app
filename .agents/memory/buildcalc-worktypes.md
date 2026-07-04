@@ -3,23 +3,32 @@ name: BuildCalc work types catalog
 description: Work type model, categories, measurement types, and price rate generation for the mobile app
 ---
 
-## Work type catalog
+## Work type catalog — 13 categories, 48 work types
 
-26 work types across 7 categories modelled on ewyceniarka.pl:
-- `prep` — Prace przygotowawcze (demolition-walls, chipping, dismantling, debris-removal)
-- `plastering` — Tynki i gładzie (traditional-plastering, smoothing-compound, priming)
-- `painting` — Malowanie i sufity (interior-painting, exterior-painting, partition-walls, suspended-ceiling)
-- `tiling` — Glazurnictwo i flizowanie (floor-tiles, large-format-tiles, wall-tiles, mosaic, grouting)
-- `flooring` — Wykończenie podłóg (laminate-lvt, hardwood-floor, self-leveling, screed, skirting)
-- `carpentry` — Stolarka i montaż (door-frames, windowsills, pipe-boxing)
-- `installations` — Instalacje i biały montaż (electrical, plumbing)
+Matches ewyceniarka.pl full interior-finishing catalog:
+
+| # | slug | Polish name | items |
+|---|------|-------------|-------|
+| 1 | `prep` | Prace przygotowawcze | 4 |
+| 2 | `walls-ceilings` | Ściany i sufity | 6 |
+| 3 | `drywall` | Zabudowy GK i sufity | 4 |
+| 4 | `flooring` | Podłogi | 5 |
+| 5 | `tiling` | Płytki i glazura | 5 |
+| 6 | `bathroom` | Łazienki | 4 |
+| 7 | `kitchen` | Kuchnie | 3 |
+| 8 | `carpentry` | Drzwi i stolarka | 3 |
+| 9 | `electrical` | Instalacje elektryczne | 3 |
+| 10 | `plumbing` | Instalacje hydrauliczne | 3 |
+| 11 | `decorative` | Wykończenia dekoracyjne | 3 |
+| 12 | `assembly` | Prace montażowe | 3 |
+| 13 | `finishing` | Prace końcowe | 2 |
 
 ## Measurement types (MeasurementType)
 
 Four values: `'floor' | 'wall' | 'linear' | 'count'`
 - `floor` / `wall`: two-dim input (dim1 × dim2 → area m²)
-- `linear`: single input → area = mb (e.g. skirting, windowsills, pipe-boxing)
-- `count`: single input → area = szt. (e.g. dismantling, door-frames)
+- `linear`: single input → length in mb (skirting, windowsills, pipe-boxing, LED accents...)
+- `count`: single input → quantity in szt. (doors, fixtures, accessories...)
 
 **Why:** linear (mb) and count (szt.) items can't use 2D area input; the calculator conditionally renders the right UI.
 
@@ -47,3 +56,14 @@ Factors account for both local labor costs and FX rate relative to PLN.
 ## WycenaPosition
 
 Has `workTypeEmoji: string` (not `workTypeIconName`). The deprecated `Estimate` type still has `workTypeIconName` for backward compat — EstimateCard.tsx renders old saved data.
+
+## Category slug note
+
+`'walls-ceilings'` has a hyphen — must be quoted in TypeScript object keys: `'walls-ceilings': string` in TranslationKeys.categories type.
+Legacy slugs (`plastering`, `painting`, `installations`, `walls`, `roofing`, `insulation`) kept in translations for backward compat but no work types reference them anymore.
+
+## work-type-select.tsx two-step picker
+
+Step 1: 2-column grid (FlatList numColumns=2). CAT_COLORS array must have exactly 13 entries matching CATEGORY_ORDER order.
+Step 2: work items list for selected category.
+Search overrides both steps. Back button clears search (not router.back) when query is non-empty.
