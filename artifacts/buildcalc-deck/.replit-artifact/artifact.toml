@@ -1,0 +1,27 @@
+kind = "slides"
+previewPath = "/buildcalc-deck/"
+title = "BuildCalc – Prezentacja"
+version = "1.0.0"
+id = "artifacts/buildcalc-deck"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/buildcalc-deck/" ]
+localPort = 22010
+
+[services.development]
+run = "pnpm --filter @workspace/buildcalc-deck run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/buildcalc-deck", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/buildcalc-deck/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22010"
+BASE_PATH = "/buildcalc-deck/"

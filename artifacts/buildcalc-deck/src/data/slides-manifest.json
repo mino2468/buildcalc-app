@@ -1,0 +1,42 @@
+[
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567801",
+    "position": 1,
+    "filepath": "src/pages/slides/Slide1Title.tsx",
+    "title": "BuildCalc – Wycena Robót",
+    "description": "Slajd tytułowy prezentacji aplikacji mobilnej",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567802",
+    "position": 2,
+    "filepath": "src/pages/slides/Slide2Problem.tsx",
+    "title": "Problem",
+    "description": "Opis problemu wykonawców z ręczną wyceną",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567803",
+    "position": 3,
+    "filepath": "src/pages/slides/Slide3HowItWorks.tsx",
+    "title": "Jak działa BuildCalc",
+    "description": "Pięć kroków od wyboru robót do PDF",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567804",
+    "position": 4,
+    "filepath": "src/pages/slides/Slide4Scale.tsx",
+    "title": "Zasięg i skala",
+    "description": "13 krajów, 7 języków, 49 typów robót",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567805",
+    "position": 5,
+    "filepath": "src/pages/slides/Slide5Closing.tsx",
+    "title": "Zacznij wyceniać szybciej",
+    "description": "Slajd zamykający z kontaktem i statystykami",
+    "speakerNotes": ""
+  }
+]
