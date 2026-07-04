@@ -64,9 +64,17 @@ export default function CalculatorScreen() {
 
   // Auto-compute area from dims
   useEffect(() => {
-    const d1 = parseFloat(dim1), d2 = parseFloat(dim2);
-    if (d1 > 0 && d2 > 0) setArea((d1 * d2).toFixed(2));
-  }, [dim1, dim2]);
+    if (!pendingWT) return;
+    const mt = pendingWT.measurementType;
+    if (mt === 'linear' || mt === 'count') {
+      // single-dimension: area = dim1 directly
+      const d1 = parseFloat(dim1);
+      if (d1 > 0) setArea(d1.toString());
+    } else {
+      const d1 = parseFloat(dim1), d2 = parseFloat(dim2);
+      if (d1 > 0 && d2 > 0) setArea((d1 * d2).toFixed(2));
+    }
+  }, [dim1, dim2, pendingWT?.measurementType]);
 
   // Pick up pending work type from work-type-select screen
   useFocusEffect(
@@ -104,7 +112,7 @@ export default function CalculatorScreen() {
       id: Date.now().toString(),
       workTypeId: pendingWT.id,
       workTypeName: name,
-      workTypeIconName: pendingWT.iconName,
+      workTypeEmoji: pendingWT.emoji,
       workTypeUnit: pendingWT.unit,
       area: areaNum,
       pricePerUnit: priceNum,
@@ -270,7 +278,7 @@ export default function CalculatorScreen() {
           <View style={[styles.pendingCard, { backgroundColor: colors.card, borderColor: colors.primary }]}>
             {/* Work type header */}
             <View style={styles.pendingHeader}>
-              <Ionicons name={pendingWT.iconName as any} size={20} color={colors.primary} />
+              <Text style={styles.pendingEmoji}>{pendingWT.emoji}</Text>
               <Text style={[styles.pendingWTName, { color: colors.foreground }]} numberOfLines={1}>
                 {pendingWT.translations[language]?.name ?? pendingWT.translations['en']?.name}
               </Text>
@@ -285,50 +293,75 @@ export default function CalculatorScreen() {
               </Text>
             )}
 
-            {/* Dims */}
-            <View style={styles.dimsRow}>
-              <View style={styles.dimCol}>
-                <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>{dim1Label} (m)</Text>
-                <TextInput
-                  value={dim1} onChangeText={(v) => setDim1(v.replace(/[^0-9.]/g, ''))}
-                  keyboardType="decimal-pad" placeholder="0.00"
-                  placeholderTextColor={colors.mutedForeground} selectTextOnFocus
-                  style={[styles.dimInput, { color: colors.foreground, borderColor: colors.border }]}
-                />
+            {/* Dims — single input for linear/count, two-dim for floor/wall */}
+            {(pendingWT.measurementType === 'linear' || pendingWT.measurementType === 'count') ? (
+              <View style={styles.dimsRow}>
+                <View style={[styles.dimCol, { flex: 1 }]}>
+                  <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>
+                    {pendingWT.measurementType === 'count'
+                      ? `${t(language, 'quantity')} (${pendingWT.unit})`
+                      : `${t(language, 'length')} (${pendingWT.unit})`}
+                  </Text>
+                  <TextInput
+                    value={dim1}
+                    onChangeText={(v) => { const n = v.replace(/[^0-9.]/g, ''); setDim1(n); setArea(n); }}
+                    keyboardType="decimal-pad" placeholder="0"
+                    placeholderTextColor={colors.mutedForeground} selectTextOnFocus
+                    style={[styles.dimInput, { color: colors.foreground, borderColor: colors.border }]}
+                  />
+                </View>
               </View>
-              <Text style={[styles.dimMul, { color: colors.mutedForeground }]}>×</Text>
-              <View style={styles.dimCol}>
-                <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>{dim2Label} (m)</Text>
-                <TextInput
-                  value={dim2} onChangeText={(v) => setDim2(v.replace(/[^0-9.]/g, ''))}
-                  keyboardType="decimal-pad" placeholder="0.00"
-                  placeholderTextColor={colors.mutedForeground} selectTextOnFocus
-                  style={[styles.dimInput, { color: colors.foreground, borderColor: colors.border }]}
-                />
-              </View>
-            </View>
-            {dim1 && dim2 && parseFloat(dim1) > 0 && parseFloat(dim2) > 0 && (
-              <View style={[styles.dimResult, { backgroundColor: colors.accent }]}>
-                <Text style={[styles.dimResultText, { color: colors.primary }]}>
-                  = {(parseFloat(dim1) * parseFloat(dim2)).toFixed(2)} m²
-                </Text>
-              </View>
+            ) : (
+              <>
+                <View style={styles.dimsRow}>
+                  <View style={styles.dimCol}>
+                    <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>{dim1Label} (m)</Text>
+                    <TextInput
+                      value={dim1} onChangeText={(v) => setDim1(v.replace(/[^0-9.]/g, ''))}
+                      keyboardType="decimal-pad" placeholder="0.00"
+                      placeholderTextColor={colors.mutedForeground} selectTextOnFocus
+                      style={[styles.dimInput, { color: colors.foreground, borderColor: colors.border }]}
+                    />
+                  </View>
+                  <Text style={[styles.dimMul, { color: colors.mutedForeground }]}>×</Text>
+                  <View style={styles.dimCol}>
+                    <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>{dim2Label} (m)</Text>
+                    <TextInput
+                      value={dim2} onChangeText={(v) => setDim2(v.replace(/[^0-9.]/g, ''))}
+                      keyboardType="decimal-pad" placeholder="0.00"
+                      placeholderTextColor={colors.mutedForeground} selectTextOnFocus
+                      style={[styles.dimInput, { color: colors.foreground, borderColor: colors.border }]}
+                    />
+                  </View>
+                </View>
+                {dim1 && dim2 && parseFloat(dim1) > 0 && parseFloat(dim2) > 0 && (
+                  <View style={[styles.dimResult, { backgroundColor: colors.accent }]}>
+                    <Text style={[styles.dimResultText, { color: colors.primary }]}>
+                      = {(parseFloat(dim1) * parseFloat(dim2)).toFixed(2)} m²
+                    </Text>
+                  </View>
+                )}
+              </>
             )}
 
-            {/* Area + Price row */}
+            {/* Area + Price row — for floor/wall also show direct area override */}
             <View style={styles.apRow}>
+              {(pendingWT.measurementType === 'floor' || pendingWT.measurementType === 'wall') && (
+                <View style={styles.apCol}>
+                  <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>{t(language, 'area')}</Text>
+                  <TextInput
+                    value={area}
+                    onChangeText={(v) => { setArea(v.replace(/[^0-9.]/g, '')); setDim1(''); setDim2(''); }}
+                    keyboardType="decimal-pad" placeholder="0"
+                    placeholderTextColor={colors.mutedForeground} selectTextOnFocus
+                    style={[styles.apInput, { color: colors.foreground, borderColor: colors.border }]}
+                  />
+                </View>
+              )}
               <View style={styles.apCol}>
-                <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>{t(language, 'area')}</Text>
-                <TextInput
-                  value={area}
-                  onChangeText={(v) => { setArea(v.replace(/[^0-9.]/g, '')); setDim1(''); setDim2(''); }}
-                  keyboardType="decimal-pad" placeholder="0"
-                  placeholderTextColor={colors.mutedForeground} selectTextOnFocus
-                  style={[styles.apInput, { color: colors.foreground, borderColor: colors.border }]}
-                />
-              </View>
-              <View style={styles.apCol}>
-                <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>{t(language, 'pricePerUnit')} ({sym})</Text>
+                <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>
+                  {t(language, 'pricePerUnit').replace('m²', pendingWT.unit)} ({sym})
+                </Text>
                 <TextInput
                   value={price} onChangeText={setPrice}
                   keyboardType="decimal-pad" placeholder={rate?.avg.toString() ?? '0'}
@@ -488,6 +521,7 @@ const styles = StyleSheet.create({
 
   pendingCard: { borderRadius: 14, borderWidth: 2, marginBottom: 10, padding: 14, gap: 12 },
   pendingHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  pendingEmoji: { fontSize: 20 },
   pendingWTName: { flex: 1, fontSize: 15, fontFamily: 'Inter_600SemiBold' },
   changeLink:    { fontSize: 12, fontFamily: 'Inter_600SemiBold' },
   rateHint:      { fontSize: 11, fontFamily: 'Inter_400Regular', marginTop: -6 },

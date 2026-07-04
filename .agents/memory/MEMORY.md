@@ -1,2 +1,3 @@
 - [BuildCalc mobile architecture](buildcalc-mobile.md) — multi-position Wycena builder (ewyceniarka.pl-style); WycenasContext; addWycena returns doc; Ionicons font fix.
 - [BuildCalc currency & rates model](buildcalc-currency.md) — Estimate uses currencyCode/currencySymbol (no countryCode); 8 unique currencies; EUR averages across zones; rates fetched from API on launch.
+- [BuildCalc work types catalog](buildcalc-worktypes.md) — 26 work types, 7 categories (ewyceniarka.pl structure); emoji instead of Ionicons; linear/count measurement types; priceRates uses PLN-base × country factor.

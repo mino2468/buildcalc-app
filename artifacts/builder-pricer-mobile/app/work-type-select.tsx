@@ -68,7 +68,7 @@ export default function WorkTypeSelectScreen() {
         ]}
       >
         <View style={[styles.iconWrap, { backgroundColor: colors.accent }]}>
-          <Ionicons name={wt.iconName as any} size={20} color={colors.primary} />
+          <Text style={styles.emojiIcon}>{wt.emoji}</Text>
         </View>
         <View style={styles.itemText}>
           <Text style={[styles.itemName, { color: colors.foreground }]} numberOfLines={2}>{name}</Text>
@@ -184,6 +184,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconWrap: { width: 36, height: 36, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
+  emojiIcon: { fontSize: 18 },
   itemText: { flex: 1 },
   itemName: { fontSize: 14, fontFamily: 'Inter_500Medium', lineHeight: 18 },
   itemCat: { fontSize: 12, fontFamily: 'Inter_400Regular', marginTop: 1 },

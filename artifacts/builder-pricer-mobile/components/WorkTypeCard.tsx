@@ -33,11 +33,7 @@ export function WorkTypeCard({ workType, lang, onPress, selected, compact }: Pro
         ]}
       >
         <View style={[styles.compactIconWrap, { backgroundColor: selected ? colors.primary : colors.secondary }]}>
-          <Ionicons
-            name={workType.iconName as any}
-            size={20}
-            color={selected ? colors.primaryForeground : colors.primary}
-          />
+          <Text style={styles.compactEmoji}>{workType.emoji}</Text>
         </View>
         <View style={styles.compactText}>
           <Text style={[styles.compactName, { color: colors.foreground }]} numberOfLines={2}>{name}</Text>
@@ -59,7 +55,7 @@ export function WorkTypeCard({ workType, lang, onPress, selected, compact }: Pro
       ]}
     >
       <View style={[styles.iconWrap, { backgroundColor: colors.accent }]}>
-        <Ionicons name={workType.iconName as any} size={28} color={colors.primary} />
+        <Text style={styles.emoji}>{workType.emoji}</Text>
       </View>
       <View style={styles.textWrap}>
         <Text style={[styles.name, { color: colors.foreground }]} numberOfLines={2}>{name}</Text>
@@ -89,6 +85,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  emoji: { fontSize: 26 },
   textWrap: { flex: 1, gap: 4 },
   name: { fontSize: 15, fontFamily: 'Inter_600SemiBold', lineHeight: 20 },
   catBadge: { alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
@@ -110,6 +107,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  compactEmoji: { fontSize: 20 },
   compactText: { flex: 1 },
   compactName: { fontSize: 14, fontFamily: 'Inter_600SemiBold', lineHeight: 18 },
   compactCat: { fontSize: 11, fontFamily: 'Inter_400Regular', marginTop: 1 },

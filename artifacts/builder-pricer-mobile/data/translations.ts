@@ -52,9 +52,15 @@ type TranslationKeys = {
   vatRate: string; noVat: string; totalNet: string; totalGross: string;
   estimateNo: string; noPositions: string; clearEstimate: string;
   positions: string; positionCount: string;
+  // linear / count measurement types
+  quantity: string;
   categories: {
-    flooring: string; walls: string; painting: string;
-    roofing: string; insulation: string; electrical: string; plumbing: string;
+    // new categories (ewyceniarka.pl)
+    prep: string; plastering: string; tiling: string; carpentry: string; installations: string;
+    // existing
+    flooring: string; painting: string;
+    // legacy (kept for compat)
+    walls: string; roofing: string; insulation: string; electrical: string; plumbing: string;
   };
 };
 
@@ -94,9 +100,14 @@ const translations: Record<Language, TranslationKeys> = {
     vatRate: 'VAT', noVat: 'Bez VAT', totalNet: 'Razem netto', totalGross: 'Razem brutto',
     estimateNo: 'Kosztorys', noPositions: 'Brak pozycji', clearEstimate: 'Nowy dokument',
     positions: 'Pozycje', positionCount: 'poz.',
+    quantity: 'Ilość',
     categories: {
-      flooring: 'Podłogi', walls: 'Ściany', painting: 'Malowanie',
-      roofing: 'Dach', insulation: 'Ocieplenie', electrical: 'Elektryka', plumbing: 'Hydraulika',
+      prep: 'Prace przygotowawcze', plastering: 'Tynki i gładzie',
+      painting: 'Malowanie i sufity', tiling: 'Glazurnictwo i flizowanie',
+      flooring: 'Wykończenie podłóg', carpentry: 'Stolarka i montaż',
+      installations: 'Instalacje i biały montaż',
+      walls: 'Ściany', roofing: 'Dach', insulation: 'Ocieplenie',
+      electrical: 'Elektryka', plumbing: 'Hydraulika',
     },
   },
   en: {
@@ -134,9 +145,14 @@ const translations: Record<Language, TranslationKeys> = {
     vatRate: 'VAT', noVat: 'No VAT', totalNet: 'Total net', totalGross: 'Total gross',
     estimateNo: 'Estimate', noPositions: 'No positions', clearEstimate: 'New document',
     positions: 'Positions', positionCount: 'pos.',
+    quantity: 'Quantity',
     categories: {
-      flooring: 'Flooring', walls: 'Walls', painting: 'Painting',
-      roofing: 'Roofing', insulation: 'Insulation', electrical: 'Electrical', plumbing: 'Plumbing',
+      prep: 'Preparation', plastering: 'Plastering',
+      painting: 'Painting & Ceilings', tiling: 'Tiling',
+      flooring: 'Flooring', carpentry: 'Carpentry & Assembly',
+      installations: 'Installations',
+      walls: 'Walls', roofing: 'Roofing', insulation: 'Insulation',
+      electrical: 'Electrical', plumbing: 'Plumbing',
     },
   },
   de: {
@@ -174,9 +190,14 @@ const translations: Record<Language, TranslationKeys> = {
     vatRate: 'MwSt.', noVat: 'Ohne MwSt.', totalNet: 'Netto gesamt', totalGross: 'Brutto gesamt',
     estimateNo: 'Angebot', noPositions: 'Keine Positionen', clearEstimate: 'Neues Dokument',
     positions: 'Positionen', positionCount: 'Pos.',
+    quantity: 'Menge',
     categories: {
-      flooring: 'Böden', walls: 'Wände', painting: 'Malerei',
-      roofing: 'Dach', insulation: 'Dämmung', electrical: 'Elektrik', plumbing: 'Sanitär',
+      prep: 'Vorbereitung', plastering: 'Verputzen',
+      painting: 'Malen & Decken', tiling: 'Fliesenlegen',
+      flooring: 'Böden', carpentry: 'Schreinerarbeit',
+      installations: 'Installationen',
+      walls: 'Wände', roofing: 'Dach', insulation: 'Dämmung',
+      electrical: 'Elektrik', plumbing: 'Sanitär',
     },
   },
   fr: {
@@ -214,9 +235,14 @@ const translations: Record<Language, TranslationKeys> = {
     vatRate: 'TVA', noVat: 'Sans TVA', totalNet: 'Total HT', totalGross: 'Total TTC',
     estimateNo: 'Devis', noPositions: 'Aucun poste', clearEstimate: 'Nouveau document',
     positions: 'Postes', positionCount: 'postes',
+    quantity: 'Quantité',
     categories: {
-      flooring: 'Sols', walls: 'Murs', painting: 'Peinture',
-      roofing: 'Toiture', insulation: 'Isolation', electrical: 'Électricité', plumbing: 'Plomberie',
+      prep: 'Préparation', plastering: 'Plâtrerie',
+      painting: 'Peinture & Plafonds', tiling: 'Carrelage',
+      flooring: 'Sols', carpentry: 'Menuiserie',
+      installations: 'Installations',
+      walls: 'Murs', roofing: 'Toiture', insulation: 'Isolation',
+      electrical: 'Électricité', plumbing: 'Plomberie',
     },
   },
   uk: {
@@ -254,9 +280,14 @@ const translations: Record<Language, TranslationKeys> = {
     vatRate: 'ПДВ', noVat: 'Без ПДВ', totalNet: 'Разом без ПДВ', totalGross: 'Разом з ПДВ',
     estimateNo: 'Кошторис', noPositions: 'Немає позицій', clearEstimate: 'Новий документ',
     positions: 'Позиції', positionCount: 'поз.',
+    quantity: 'Кількість',
     categories: {
-      flooring: 'Підлога', walls: 'Стіни', painting: 'Малярство',
-      roofing: 'Покрівля', insulation: 'Утеплення', electrical: 'Електрика', plumbing: 'Сантехніка',
+      prep: 'Підготовчі роботи', plastering: 'Штукатурка і шпаклівка',
+      painting: 'Малярство і стелі', tiling: 'Плиткування',
+      flooring: 'Підлога', carpentry: 'Столярка і монтаж',
+      installations: 'Інсталяції та монтаж',
+      walls: 'Стіни', roofing: 'Покрівля', insulation: 'Утеплення',
+      electrical: 'Електрика', plumbing: 'Сантехніка',
     },
   },
   es: {
@@ -294,9 +325,14 @@ const translations: Record<Language, TranslationKeys> = {
     vatRate: 'IVA', noVat: 'Sin IVA', totalNet: 'Total sin IVA', totalGross: 'Total con IVA',
     estimateNo: 'Presupuesto', noPositions: 'Sin partidas', clearEstimate: 'Nuevo documento',
     positions: 'Partidas', positionCount: 'part.',
+    quantity: 'Cantidad',
     categories: {
-      flooring: 'Suelos', walls: 'Paredes', painting: 'Pintura',
-      roofing: 'Tejado', insulation: 'Aislamiento', electrical: 'Electricidad', plumbing: 'Fontanería',
+      prep: 'Preparación', plastering: 'Enlucidos',
+      painting: 'Pintura y Techos', tiling: 'Alicatado',
+      flooring: 'Suelos', carpentry: 'Carpintería',
+      installations: 'Instalaciones',
+      walls: 'Paredes', roofing: 'Tejado', insulation: 'Aislamiento',
+      electrical: 'Electricidad', plumbing: 'Fontanería',
     },
   },
   cs: {
@@ -334,9 +370,14 @@ const translations: Record<Language, TranslationKeys> = {
     vatRate: 'DPH', noVat: 'Bez DPH', totalNet: 'Celkem bez DPH', totalGross: 'Celkem s DPH',
     estimateNo: 'Kalkulace', noPositions: 'Žádné položky', clearEstimate: 'Nový dokument',
     positions: 'Položky', positionCount: 'pol.',
+    quantity: 'Množství',
     categories: {
-      flooring: 'Podlahy', walls: 'Stěny', painting: 'Malování',
-      roofing: 'Střecha', insulation: 'Zateplení', electrical: 'Elektrika', plumbing: 'Instalatérství',
+      prep: 'Přípravné práce', plastering: 'Omítky a stěrky',
+      painting: 'Malování a stropy', tiling: 'Obkládání',
+      flooring: 'Podlahy', carpentry: 'Truhlářství a montáž',
+      installations: 'Instalace',
+      walls: 'Stěny', roofing: 'Střecha', insulation: 'Zateplení',
+      electrical: 'Elektrika', plumbing: 'Instalatérství',
     },
   },
 };

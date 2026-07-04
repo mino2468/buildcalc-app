@@ -1,259 +1,76 @@
 import type { PriceRate } from '@/types';
-import { CURRENCIES } from './currencies';
 
-// Price per m² (min, avg, max) in local currency
-// Sources: approximate 2024 European construction market rates
+// Labor-cost-adjusted multipliers vs Poland (PLN base).
+// Accounts for both local wage level and currency exchange rate.
+const F: Record<string, number> = {
+  PL: 1.00, DE: 0.82, GB: 0.68, FR: 0.72, NL: 0.90,
+  BE: 0.80, AT: 0.85, CH: 1.28, CZ: 4.10, SE: 7.20,
+  NO: 10.0, UA: 3.00, ES: 0.62,
+};
+const COUNTRIES = Object.keys(F);
+
+function rates(id: string, min: number, avg: number, max: number): PriceRate[] {
+  return COUNTRIES.map((cc) => ({
+    workTypeId: id,
+    countryCode: cc,
+    min:  Math.round(min * F[cc]),
+    avg:  Math.round(avg * F[cc]),
+    max:  Math.round(max * F[cc]),
+  }));
+}
+
+// Price per unit in PLN (2024 Polish construction market averages).
+// Units: m² for area-work, mb for linear-work, szt. for count-work.
 export let PRICE_RATES: PriceRate[] = [
-  // ── POLAND (PLN) ─────────────────────────────────────────────────────────
-  { workTypeId: 'tile-floor',        countryCode: 'PL', min: 55,  avg: 80,  max: 125 },
-  { workTypeId: 'hardwood-floor',    countryCode: 'PL', min: 45,  avg: 70,  max: 110 },
-  { workTypeId: 'laminate-floor',    countryCode: 'PL', min: 18,  avg: 28,  max: 45  },
-  { workTypeId: 'screed',            countryCode: 'PL', min: 22,  avg: 38,  max: 60  },
-  { workTypeId: 'wall-tile',         countryCode: 'PL', min: 65,  avg: 95,  max: 140 },
-  { workTypeId: 'plastering',        countryCode: 'PL', min: 22,  avg: 38,  max: 62  },
-  { workTypeId: 'drywall',           countryCode: 'PL', min: 40,  avg: 62,  max: 95  },
-  { workTypeId: 'interior-painting', countryCode: 'PL', min: 10,  avg: 18,  max: 30  },
-  { workTypeId: 'exterior-painting', countryCode: 'PL', min: 18,  avg: 32,  max: 52  },
-  { workTypeId: 'roof-tiles',        countryCode: 'PL', min: 80,  avg: 120, max: 185 },
-  { workTypeId: 'metal-roofing',     countryCode: 'PL', min: 65,  avg: 100, max: 155 },
-  { workTypeId: 'wall-insulation',   countryCode: 'PL', min: 45,  avg: 70,  max: 110 },
-  { workTypeId: 'roof-insulation',   countryCode: 'PL', min: 38,  avg: 62,  max: 100 },
-  { workTypeId: 'electrical',        countryCode: 'PL', min: 35,  avg: 55,  max: 88  },
-  { workTypeId: 'plumbing',          countryCode: 'PL', min: 75,  avg: 120, max: 185 },
+  // ── Prace przygotowawcze ──────────────────────────────────────────────────
+  ...rates('demolition-walls',        60,  95,  150),  // m²
+  ...rates('chipping',                30,  55,   85),  // m²
+  ...rates('dismantling',             80, 150,  280),  // szt.
+  ...rates('debris-removal',          30,  55,   90),  // m²
 
-  // ── GERMANY (EUR) ─────────────────────────────────────────────────────────
-  { workTypeId: 'tile-floor',        countryCode: 'DE', min: 40,  avg: 62,  max: 95  },
-  { workTypeId: 'hardwood-floor',    countryCode: 'DE', min: 32,  avg: 55,  max: 88  },
-  { workTypeId: 'laminate-floor',    countryCode: 'DE', min: 12,  avg: 22,  max: 38  },
-  { workTypeId: 'screed',            countryCode: 'DE', min: 18,  avg: 30,  max: 50  },
-  { workTypeId: 'wall-tile',         countryCode: 'DE', min: 45,  avg: 72,  max: 110 },
-  { workTypeId: 'plastering',        countryCode: 'DE', min: 18,  avg: 32,  max: 52  },
-  { workTypeId: 'drywall',           countryCode: 'DE', min: 28,  avg: 46,  max: 72  },
-  { workTypeId: 'interior-painting', countryCode: 'DE', min: 8,   avg: 15,  max: 26  },
-  { workTypeId: 'exterior-painting', countryCode: 'DE', min: 12,  avg: 22,  max: 38  },
-  { workTypeId: 'roof-tiles',        countryCode: 'DE', min: 58,  avg: 92,  max: 145 },
-  { workTypeId: 'metal-roofing',     countryCode: 'DE', min: 46,  avg: 76,  max: 122 },
-  { workTypeId: 'wall-insulation',   countryCode: 'DE', min: 36,  avg: 56,  max: 88  },
-  { workTypeId: 'roof-insulation',   countryCode: 'DE', min: 30,  avg: 50,  max: 82  },
-  { workTypeId: 'electrical',        countryCode: 'DE', min: 28,  avg: 46,  max: 72  },
-  { workTypeId: 'plumbing',          countryCode: 'DE', min: 55,  avg: 92,  max: 145 },
+  // ── Tynki i gładzie ───────────────────────────────────────────────────────
+  ...rates('traditional-plastering',  22,  40,   65),  // m²
+  ...rates('smoothing-compound',      18,  28,   45),  // m²
+  ...rates('priming',                  6,  12,   20),  // m²
 
-  // ── UNITED KINGDOM (GBP) ─────────────────────────────────────────────────
-  { workTypeId: 'tile-floor',        countryCode: 'GB', min: 35,  avg: 55,  max: 88  },
-  { workTypeId: 'hardwood-floor',    countryCode: 'GB', min: 28,  avg: 50,  max: 82  },
-  { workTypeId: 'laminate-floor',    countryCode: 'GB', min: 10,  avg: 20,  max: 35  },
-  { workTypeId: 'screed',            countryCode: 'GB', min: 15,  avg: 28,  max: 46  },
-  { workTypeId: 'wall-tile',         countryCode: 'GB', min: 40,  avg: 65,  max: 102 },
-  { workTypeId: 'plastering',        countryCode: 'GB', min: 15,  avg: 28,  max: 46  },
-  { workTypeId: 'drywall',           countryCode: 'GB', min: 25,  avg: 40,  max: 66  },
-  { workTypeId: 'interior-painting', countryCode: 'GB', min: 8,   avg: 14,  max: 23  },
-  { workTypeId: 'exterior-painting', countryCode: 'GB', min: 10,  avg: 20,  max: 36  },
-  { workTypeId: 'roof-tiles',        countryCode: 'GB', min: 52,  avg: 82,  max: 132 },
-  { workTypeId: 'metal-roofing',     countryCode: 'GB', min: 42,  avg: 70,  max: 112 },
-  { workTypeId: 'wall-insulation',   countryCode: 'GB', min: 30,  avg: 50,  max: 82  },
-  { workTypeId: 'roof-insulation',   countryCode: 'GB', min: 28,  avg: 46,  max: 76  },
-  { workTypeId: 'electrical',        countryCode: 'GB', min: 26,  avg: 42,  max: 68  },
-  { workTypeId: 'plumbing',          countryCode: 'GB', min: 50,  avg: 85,  max: 135 },
+  // ── Malowanie i sufity ────────────────────────────────────────────────────
+  ...rates('interior-painting',       10,  18,   30),  // m²
+  ...rates('exterior-painting',       18,  32,   52),  // m²
+  ...rates('partition-walls',         42,  65,  100),  // m²
+  ...rates('suspended-ceiling',       55,  90,  145),  // m²
 
-  // ── FRANCE (EUR) ─────────────────────────────────────────────────────────
-  { workTypeId: 'tile-floor',        countryCode: 'FR', min: 38,  avg: 58,  max: 90  },
-  { workTypeId: 'hardwood-floor',    countryCode: 'FR', min: 30,  avg: 52,  max: 84  },
-  { workTypeId: 'laminate-floor',    countryCode: 'FR', min: 10,  avg: 20,  max: 35  },
-  { workTypeId: 'screed',            countryCode: 'FR', min: 16,  avg: 28,  max: 48  },
-  { workTypeId: 'wall-tile',         countryCode: 'FR', min: 42,  avg: 65,  max: 102 },
-  { workTypeId: 'plastering',        countryCode: 'FR', min: 16,  avg: 28,  max: 48  },
-  { workTypeId: 'drywall',           countryCode: 'FR', min: 25,  avg: 42,  max: 68  },
-  { workTypeId: 'interior-painting', countryCode: 'FR', min: 7,   avg: 14,  max: 24  },
-  { workTypeId: 'exterior-painting', countryCode: 'FR', min: 10,  avg: 20,  max: 36  },
-  { workTypeId: 'roof-tiles',        countryCode: 'FR', min: 50,  avg: 85,  max: 136 },
-  { workTypeId: 'metal-roofing',     countryCode: 'FR', min: 42,  avg: 72,  max: 116 },
-  { workTypeId: 'wall-insulation',   countryCode: 'FR', min: 32,  avg: 52,  max: 84  },
-  { workTypeId: 'roof-insulation',   countryCode: 'FR', min: 28,  avg: 48,  max: 80  },
-  { workTypeId: 'electrical',        countryCode: 'FR', min: 25,  avg: 42,  max: 68  },
-  { workTypeId: 'plumbing',          countryCode: 'FR', min: 52,  avg: 88,  max: 138 },
+  // ── Glazurnictwo i flizowanie ─────────────────────────────────────────────
+  ...rates('floor-tiles',             55,  85,  130),  // m²
+  ...rates('large-format-tiles',      90, 140,  220),  // m²
+  ...rates('wall-tiles',              65,  95,  145),  // m²
+  ...rates('mosaic',                 110, 160,  250),  // m²
+  ...rates('grouting',                12,  20,   35),  // m²
 
-  // ── NETHERLANDS (EUR) ─────────────────────────────────────────────────────
-  { workTypeId: 'tile-floor',        countryCode: 'NL', min: 42,  avg: 66,  max: 100 },
-  { workTypeId: 'hardwood-floor',    countryCode: 'NL', min: 35,  avg: 58,  max: 92  },
-  { workTypeId: 'laminate-floor',    countryCode: 'NL', min: 12,  avg: 22,  max: 38  },
-  { workTypeId: 'screed',            countryCode: 'NL', min: 18,  avg: 32,  max: 52  },
-  { workTypeId: 'wall-tile',         countryCode: 'NL', min: 48,  avg: 74,  max: 115 },
-  { workTypeId: 'plastering',        countryCode: 'NL', min: 18,  avg: 32,  max: 52  },
-  { workTypeId: 'drywall',           countryCode: 'NL', min: 30,  avg: 48,  max: 76  },
-  { workTypeId: 'interior-painting', countryCode: 'NL', min: 9,   avg: 16,  max: 28  },
-  { workTypeId: 'exterior-painting', countryCode: 'NL', min: 13,  avg: 24,  max: 40  },
-  { workTypeId: 'roof-tiles',        countryCode: 'NL', min: 60,  avg: 96,  max: 152 },
-  { workTypeId: 'metal-roofing',     countryCode: 'NL', min: 50,  avg: 80,  max: 128 },
-  { workTypeId: 'wall-insulation',   countryCode: 'NL', min: 38,  avg: 60,  max: 95  },
-  { workTypeId: 'roof-insulation',   countryCode: 'NL', min: 32,  avg: 52,  max: 86  },
-  { workTypeId: 'electrical',        countryCode: 'NL', min: 30,  avg: 50,  max: 78  },
-  { workTypeId: 'plumbing',          countryCode: 'NL', min: 60,  avg: 98,  max: 155 },
+  // ── Wykończenie podłóg ────────────────────────────────────────────────────
+  ...rates('laminate-lvt',            18,  30,   48),  // m²
+  ...rates('hardwood-floor',          45,  72,  115),  // m²
+  ...rates('self-leveling',           18,  28,   45),  // m²
+  ...rates('screed',                  22,  38,   62),  // m²
+  ...rates('skirting',                16,  26,   42),  // mb
 
-  // ── BELGIUM (EUR) ─────────────────────────────────────────────────────────
-  { workTypeId: 'tile-floor',        countryCode: 'BE', min: 38,  avg: 60,  max: 92  },
-  { workTypeId: 'hardwood-floor',    countryCode: 'BE', min: 30,  avg: 52,  max: 85  },
-  { workTypeId: 'laminate-floor',    countryCode: 'BE', min: 10,  avg: 20,  max: 35  },
-  { workTypeId: 'screed',            countryCode: 'BE', min: 16,  avg: 28,  max: 48  },
-  { workTypeId: 'wall-tile',         countryCode: 'BE', min: 42,  avg: 66,  max: 104 },
-  { workTypeId: 'plastering',        countryCode: 'BE', min: 16,  avg: 28,  max: 48  },
-  { workTypeId: 'drywall',           countryCode: 'BE', min: 26,  avg: 44,  max: 70  },
-  { workTypeId: 'interior-painting', countryCode: 'BE', min: 8,   avg: 14,  max: 24  },
-  { workTypeId: 'exterior-painting', countryCode: 'BE', min: 11,  avg: 20,  max: 36  },
-  { workTypeId: 'roof-tiles',        countryCode: 'BE', min: 52,  avg: 86,  max: 138 },
-  { workTypeId: 'metal-roofing',     countryCode: 'BE', min: 44,  avg: 74,  max: 118 },
-  { workTypeId: 'wall-insulation',   countryCode: 'BE', min: 34,  avg: 54,  max: 86  },
-  { workTypeId: 'roof-insulation',   countryCode: 'BE', min: 28,  avg: 48,  max: 80  },
-  { workTypeId: 'electrical',        countryCode: 'BE', min: 26,  avg: 44,  max: 70  },
-  { workTypeId: 'plumbing',          countryCode: 'BE', min: 52,  avg: 88,  max: 140 },
+  // ── Stolarka i montaż ─────────────────────────────────────────────────────
+  ...rates('door-frames',            280, 450,  700),  // szt.
+  ...rates('windowsills',             45,  75,  125),  // mb
+  ...rates('pipe-boxing',             90, 150,  240),  // mb
 
-  // ── AUSTRIA (EUR) ─────────────────────────────────────────────────────────
-  { workTypeId: 'tile-floor',        countryCode: 'AT', min: 42,  avg: 65,  max: 100 },
-  { workTypeId: 'hardwood-floor',    countryCode: 'AT', min: 35,  avg: 58,  max: 92  },
-  { workTypeId: 'laminate-floor',    countryCode: 'AT', min: 12,  avg: 22,  max: 38  },
-  { workTypeId: 'screed',            countryCode: 'AT', min: 18,  avg: 30,  max: 50  },
-  { workTypeId: 'wall-tile',         countryCode: 'AT', min: 46,  avg: 72,  max: 112 },
-  { workTypeId: 'plastering',        countryCode: 'AT', min: 18,  avg: 32,  max: 52  },
-  { workTypeId: 'drywall',           countryCode: 'AT', min: 30,  avg: 48,  max: 75  },
-  { workTypeId: 'interior-painting', countryCode: 'AT', min: 9,   avg: 16,  max: 27  },
-  { workTypeId: 'exterior-painting', countryCode: 'AT', min: 12,  avg: 23,  max: 40  },
-  { workTypeId: 'roof-tiles',        countryCode: 'AT', min: 58,  avg: 94,  max: 148 },
-  { workTypeId: 'metal-roofing',     countryCode: 'AT', min: 48,  avg: 78,  max: 124 },
-  { workTypeId: 'wall-insulation',   countryCode: 'AT', min: 38,  avg: 58,  max: 92  },
-  { workTypeId: 'roof-insulation',   countryCode: 'AT', min: 32,  avg: 52,  max: 84  },
-  { workTypeId: 'electrical',        countryCode: 'AT', min: 28,  avg: 46,  max: 74  },
-  { workTypeId: 'plumbing',          countryCode: 'AT', min: 56,  avg: 92,  max: 148 },
-
-  // ── SWITZERLAND (CHF) ─────────────────────────────────────────────────────
-  { workTypeId: 'tile-floor',        countryCode: 'CH', min: 60,  avg: 95,  max: 148 },
-  { workTypeId: 'hardwood-floor',    countryCode: 'CH', min: 48,  avg: 80,  max: 130 },
-  { workTypeId: 'laminate-floor',    countryCode: 'CH', min: 18,  avg: 32,  max: 55  },
-  { workTypeId: 'screed',            countryCode: 'CH', min: 26,  avg: 44,  max: 72  },
-  { workTypeId: 'wall-tile',         countryCode: 'CH', min: 65,  avg: 105, max: 162 },
-  { workTypeId: 'plastering',        countryCode: 'CH', min: 26,  avg: 44,  max: 72  },
-  { workTypeId: 'drywall',           countryCode: 'CH', min: 42,  avg: 68,  max: 108 },
-  { workTypeId: 'interior-painting', countryCode: 'CH', min: 12,  avg: 22,  max: 38  },
-  { workTypeId: 'exterior-painting', countryCode: 'CH', min: 18,  avg: 32,  max: 55  },
-  { workTypeId: 'roof-tiles',        countryCode: 'CH', min: 85,  avg: 135, max: 210 },
-  { workTypeId: 'metal-roofing',     countryCode: 'CH', min: 70,  avg: 112, max: 178 },
-  { workTypeId: 'wall-insulation',   countryCode: 'CH', min: 55,  avg: 88,  max: 138 },
-  { workTypeId: 'roof-insulation',   countryCode: 'CH', min: 46,  avg: 75,  max: 120 },
-  { workTypeId: 'electrical',        countryCode: 'CH', min: 42,  avg: 68,  max: 108 },
-  { workTypeId: 'plumbing',          countryCode: 'CH', min: 82,  avg: 132, max: 210 },
-
-  // ── CZECH REPUBLIC (CZK) ──────────────────────────────────────────────────
-  { workTypeId: 'tile-floor',        countryCode: 'CZ', min: 600,  avg: 900,  max: 1400 },
-  { workTypeId: 'hardwood-floor',    countryCode: 'CZ', min: 500,  avg: 780,  max: 1250 },
-  { workTypeId: 'laminate-floor',    countryCode: 'CZ', min: 200,  avg: 320,  max: 520  },
-  { workTypeId: 'screed',            countryCode: 'CZ', min: 250,  avg: 420,  max: 680  },
-  { workTypeId: 'wall-tile',         countryCode: 'CZ', min: 700,  avg: 1050, max: 1600 },
-  { workTypeId: 'plastering',        countryCode: 'CZ', min: 250,  avg: 420,  max: 680  },
-  { workTypeId: 'drywall',           countryCode: 'CZ', min: 450,  avg: 700,  max: 1100 },
-  { workTypeId: 'interior-painting', countryCode: 'CZ', min: 110,  avg: 190,  max: 320  },
-  { workTypeId: 'exterior-painting', countryCode: 'CZ', min: 200,  avg: 340,  max: 560  },
-  { workTypeId: 'roof-tiles',        countryCode: 'CZ', min: 900,  avg: 1350, max: 2100 },
-  { workTypeId: 'metal-roofing',     countryCode: 'CZ', min: 740,  avg: 1150, max: 1800 },
-  { workTypeId: 'wall-insulation',   countryCode: 'CZ', min: 500,  avg: 800,  max: 1250 },
-  { workTypeId: 'roof-insulation',   countryCode: 'CZ', min: 420,  avg: 680,  max: 1100 },
-  { workTypeId: 'electrical',        countryCode: 'CZ', min: 380,  avg: 620,  max: 980  },
-  { workTypeId: 'plumbing',          countryCode: 'CZ', min: 850,  avg: 1350, max: 2100 },
-
-  // ── SWEDEN (SEK) ──────────────────────────────────────────────────────────
-  { workTypeId: 'tile-floor',        countryCode: 'SE', min: 450,  avg: 700,  max: 1100 },
-  { workTypeId: 'hardwood-floor',    countryCode: 'SE', min: 380,  avg: 620,  max: 980  },
-  { workTypeId: 'laminate-floor',    countryCode: 'SE', min: 120,  avg: 210,  max: 360  },
-  { workTypeId: 'screed',            countryCode: 'SE', min: 180,  avg: 300,  max: 490  },
-  { workTypeId: 'wall-tile',         countryCode: 'SE', min: 520,  avg: 820,  max: 1280 },
-  { workTypeId: 'plastering',        countryCode: 'SE', min: 180,  avg: 300,  max: 490  },
-  { workTypeId: 'drywall',           countryCode: 'SE', min: 320,  avg: 510,  max: 800  },
-  { workTypeId: 'interior-painting', countryCode: 'SE', min: 90,   avg: 160,  max: 270  },
-  { workTypeId: 'exterior-painting', countryCode: 'SE', min: 140,  avg: 240,  max: 400  },
-  { workTypeId: 'roof-tiles',        countryCode: 'SE', min: 650,  avg: 1020, max: 1600 },
-  { workTypeId: 'metal-roofing',     countryCode: 'SE', min: 540,  avg: 860,  max: 1360 },
-  { workTypeId: 'wall-insulation',   countryCode: 'SE', min: 400,  avg: 640,  max: 1000 },
-  { workTypeId: 'roof-insulation',   countryCode: 'SE', min: 340,  avg: 540,  max: 860  },
-  { workTypeId: 'electrical',        countryCode: 'SE', min: 300,  avg: 490,  max: 780  },
-  { workTypeId: 'plumbing',          countryCode: 'SE', min: 640,  avg: 1020, max: 1620 },
-
-  // ── NORWAY (NOK) ──────────────────────────────────────────────────────────
-  { workTypeId: 'tile-floor',        countryCode: 'NO', min: 550,  avg: 860,  max: 1340 },
-  { workTypeId: 'hardwood-floor',    countryCode: 'NO', min: 460,  avg: 750,  max: 1200 },
-  { workTypeId: 'laminate-floor',    countryCode: 'NO', min: 150,  avg: 260,  max: 440  },
-  { workTypeId: 'screed',            countryCode: 'NO', min: 220,  avg: 370,  max: 600  },
-  { workTypeId: 'wall-tile',         countryCode: 'NO', min: 640,  avg: 1000, max: 1560 },
-  { workTypeId: 'plastering',        countryCode: 'NO', min: 220,  avg: 370,  max: 600  },
-  { workTypeId: 'drywall',           countryCode: 'NO', min: 390,  avg: 625,  max: 980  },
-  { workTypeId: 'interior-painting', countryCode: 'NO', min: 110,  avg: 195,  max: 330  },
-  { workTypeId: 'exterior-painting', countryCode: 'NO', min: 170,  avg: 295,  max: 490  },
-  { workTypeId: 'roof-tiles',        countryCode: 'NO', min: 800,  avg: 1250, max: 1960 },
-  { workTypeId: 'metal-roofing',     countryCode: 'NO', min: 660,  avg: 1050, max: 1660 },
-  { workTypeId: 'wall-insulation',   countryCode: 'NO', min: 490,  avg: 780,  max: 1230 },
-  { workTypeId: 'roof-insulation',   countryCode: 'NO', min: 415,  avg: 660,  max: 1050 },
-  { workTypeId: 'electrical',        countryCode: 'NO', min: 370,  avg: 600,  max: 950  },
-  { workTypeId: 'plumbing',          countryCode: 'NO', min: 780,  avg: 1250, max: 1980 },
-
-  // ── SPAIN (EUR) ───────────────────────────────────────────────────────────
-  { workTypeId: 'tile-floor',        countryCode: 'ES', min: 30,  avg: 50,  max: 80  },
-  { workTypeId: 'hardwood-floor',    countryCode: 'ES', min: 24,  avg: 44,  max: 72  },
-  { workTypeId: 'laminate-floor',    countryCode: 'ES', min: 8,   avg: 16,  max: 28  },
-  { workTypeId: 'screed',            countryCode: 'ES', min: 12,  avg: 22,  max: 38  },
-  { workTypeId: 'wall-tile',         countryCode: 'ES', min: 35,  avg: 56,  max: 88  },
-  { workTypeId: 'plastering',        countryCode: 'ES', min: 12,  avg: 22,  max: 38  },
-  { workTypeId: 'drywall',           countryCode: 'ES', min: 20,  avg: 34,  max: 56  },
-  { workTypeId: 'interior-painting', countryCode: 'ES', min: 6,   avg: 11,  max: 19  },
-  { workTypeId: 'exterior-painting', countryCode: 'ES', min: 9,   avg: 16,  max: 28  },
-  { workTypeId: 'roof-tiles',        countryCode: 'ES', min: 40,  avg: 68,  max: 108 },
-  { workTypeId: 'metal-roofing',     countryCode: 'ES', min: 34,  avg: 56,  max: 90  },
-  { workTypeId: 'wall-insulation',   countryCode: 'ES', min: 26,  avg: 42,  max: 68  },
-  { workTypeId: 'roof-insulation',   countryCode: 'ES', min: 22,  avg: 36,  max: 60  },
-  { workTypeId: 'electrical',        countryCode: 'ES', min: 20,  avg: 34,  max: 55  },
-  { workTypeId: 'plumbing',          countryCode: 'ES', min: 42,  avg: 70,  max: 112 },
-
-  // ── UKRAINE (UAH) ─────────────────────────────────────────────────────────
-  { workTypeId: 'tile-floor',        countryCode: 'UA', min: 300,  avg: 550,  max: 850  },
-  { workTypeId: 'hardwood-floor',    countryCode: 'UA', min: 250,  avg: 450,  max: 720  },
-  { workTypeId: 'laminate-floor',    countryCode: 'UA', min: 100,  avg: 180,  max: 300  },
-  { workTypeId: 'screed',            countryCode: 'UA', min: 120,  avg: 210,  max: 340  },
-  { workTypeId: 'wall-tile',         countryCode: 'UA', min: 350,  avg: 620,  max: 960  },
-  { workTypeId: 'plastering',        countryCode: 'UA', min: 120,  avg: 210,  max: 340  },
-  { workTypeId: 'drywall',           countryCode: 'UA', min: 220,  avg: 380,  max: 600  },
-  { workTypeId: 'interior-painting', countryCode: 'UA', min: 60,   avg: 110,  max: 180  },
-  { workTypeId: 'exterior-painting', countryCode: 'UA', min: 100,  avg: 180,  max: 290  },
-  { workTypeId: 'roof-tiles',        countryCode: 'UA', min: 440,  avg: 720,  max: 1120 },
-  { workTypeId: 'metal-roofing',     countryCode: 'UA', min: 360,  avg: 600,  max: 940  },
-  { workTypeId: 'wall-insulation',   countryCode: 'UA', min: 270,  avg: 450,  max: 720  },
-  { workTypeId: 'roof-insulation',   countryCode: 'UA', min: 225,  avg: 380,  max: 610  },
-  { workTypeId: 'electrical',        countryCode: 'UA', min: 200,  avg: 340,  max: 550  },
-  { workTypeId: 'plumbing',          countryCode: 'UA', min: 430,  avg: 720,  max: 1140 },
+  // ── Instalacje i biały montaż ─────────────────────────────────────────────
+  ...rates('electrical',              35,  55,   88),  // m²
+  ...rates('plumbing',                75, 120,  185),  // m²
 ];
 
 /** Replace PRICE_RATES with fresh data fetched from the server. */
-export function setRatesFromServer(rates: PriceRate[]) {
-  if (rates && rates.length > 0) PRICE_RATES = rates;
+export function setRatesFromServer(incoming: PriceRate[]) {
+  if (incoming && incoming.length > 0) PRICE_RATES = incoming;
 }
 
-/** Look up rate for a specific country code (internal use). */
+/** Rate for a work type + country. */
 export function getPriceRate(workTypeId: string, countryCode: string): PriceRate | undefined {
   return PRICE_RATES.find(
     (r) => r.workTypeId === workTypeId && r.countryCode === countryCode,
   );
-}
-
-/** Look up rate for a currency — averages across all countries that use it. */
-export function getPriceRateByCurrency(workTypeId: string, currencyCode: string): PriceRate | undefined {
-  const currency = CURRENCIES.find((c) => c.code === currencyCode);
-  if (!currency) return undefined;
-
-  const rates = currency.countryCodes
-    .map((cc) => PRICE_RATES.find((r) => r.workTypeId === workTypeId && r.countryCode === cc))
-    .filter((r): r is PriceRate => r !== undefined);
-
-  if (!rates.length) return undefined;
-
-  return {
-    workTypeId,
-    countryCode: currencyCode,
-    min: Math.round(rates.reduce((s, r) => s + r.min, 0) / rates.length),
-    avg: Math.round(rates.reduce((s, r) => s + r.avg, 0) / rates.length),
-    max: Math.round(rates.reduce((s, r) => s + r.max, 0) / rates.length),
-  };
 }

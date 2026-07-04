@@ -1,0 +1,429 @@
+Katalog usług wykończenia wnętrz — do wyceny
+1. Prace przygotowawcze
+Zabezpieczenie miejsca pracy
+Zabezpieczenie podłóg
+Zabezpieczenie okien, drzwi i mebli
+Oklejanie taśmą
+Folia ochronna
+Zabezpieczenie ciągów komunikacyjnych
+
+Jednostka wyceny: m² / pomieszczenie / całość
+
+Demontaże
+Demontaż starych listew przypodłogowych
+Demontaż paneli
+Demontaż płytek
+Demontaż drzwi wewnętrznych
+Demontaż sanitariatów
+Demontaż mebli kuchennych
+Demontaż sufitów podwieszanych
+Skucie tynków
+Usunięcie starej farby lub tapety
+
+Jednostka wyceny: m² / mb / szt. / komplet
+
+Wynoszenie i utylizacja
+Wynoszenie gruzu
+Pakowanie odpadów
+Załadunek
+Transport odpadów
+Utylizacja
+
+Jednostka wyceny: worek / m³ / kurs / całość
+
+2. Ściany i sufity
+Szpachlowanie i naprawy
+Naprawa pęknięć
+Uzupełnianie ubytków
+Szpachlowanie punktowe
+Szpachlowanie całych powierzchni
+Wtapianie taśmy
+Obróbka narożników
+Szlifowanie
+
+Jednostka wyceny: m² / mb / punkt
+
+Gładzie
+Gładź na ścianach
+Gładź na sufitach
+Gładź dwuwarstwowa
+Szlifowanie gładzi
+Gruntowanie pod gładź
+
+Jednostka wyceny: m²
+
+Gruntowanie
+Gruntowanie ścian
+Gruntowanie sufitów
+Gruntowanie pod farbę
+Gruntowanie pod płytki
+Gruntowanie pod posadzki
+
+Jednostka wyceny: m²
+
+Malowanie
+Malowanie ścian
+Malowanie sufitów
+Malowanie dwukrotne
+Malowanie farbami zmywalnymi
+Malowanie farbami specjalistycznymi
+Malowanie kolorami ciemnymi
+Odcięcia kolorów
+Malowanie drzwi / futryn / listew
+
+Jednostka wyceny: m² / szt. / mb
+
+Tapetowanie
+Tapetowanie ścian
+Tapeta dekoracyjna
+Fototapeta
+Przygotowanie ściany pod tapetę
+Usuwanie starej tapety
+
+Jednostka wyceny: m² / ściana / rolka
+
+3. Zabudowy GK i sufity podwieszane
+Ścianki działowe GK
+Montaż konstrukcji
+Montaż płyt GK
+Wygłuszenie wełną
+Szpachlowanie łączeń
+Przygotowanie pod malowanie
+
+Jednostka wyceny: m²
+
+Sufity podwieszane
+Sufit prosty
+Sufit wielopoziomowy
+Sufit z wnęką LED
+Zabudowa karnisza
+Wzmocnienia pod oświetlenie
+
+Jednostka wyceny: m² / mb / punkt
+
+Zabudowy dekoracyjne
+Zabudowa rur
+Zabudowa stelaża WC
+Zabudowa wnęk
+Półki z GK
+Ścianki TV
+Maskownice
+
+Jednostka wyceny: mb / m² / szt.
+
+4. Podłogi
+Przygotowanie podłoża
+Czyszczenie podłoża
+Gruntowanie
+Wyrównanie punktowe
+Masa samopoziomująca
+Naprawa pęknięć
+Usuwanie starego kleju
+
+Jednostka wyceny: m²
+
+Panele i podłogi laminowane
+Montaż paneli
+Montaż podkładu
+Montaż folii paroizolacyjnej
+Docinki przy ścianach
+Docinki przy futrynach
+Montaż progów
+
+Jednostka wyceny: m² / mb / szt.
+
+Podłogi winylowe / LVT
+Montaż paneli winylowych click
+Klejenie paneli winylowych
+Przygotowanie idealnie równego podłoża
+Montaż podkładu
+Docinki
+
+Jednostka wyceny: m²
+
+Listwy przypodłogowe
+Montaż listew MDF
+Montaż listew PCV
+Montaż listew drewnianych
+Cięcie narożników
+Silikonowanie / akrylowanie
+Malowanie listew
+
+Jednostka wyceny: mb
+
+5. Płytki i glazura
+Układanie płytek
+Płytki na podłodze
+Płytki na ścianie
+Płytki małego formatu
+Płytki dużego formatu
+Gres
+Mozaika
+Dekory
+
+Jednostka wyceny: m²
+
+Przygotowanie pod płytki
+Gruntowanie
+Hydroizolacja
+Taśmy uszczelniające
+Wyrównanie ścian
+Wyrównanie podłóg
+Mata odsprzęgająca
+
+Jednostka wyceny: m² / mb
+
+Docinki i obróbki
+Docinki proste
+Docinki pod kątem 45°
+Otwory pod gniazdka
+Otwory pod rury
+Szlifowanie krawędzi
+Montaż listew narożnych
+
+Jednostka wyceny: mb / szt.
+
+Fugowanie i silikonowanie
+Fugowanie standardowe
+Fuga epoksydowa
+Silikonowanie narożników
+Silikonowanie przy wannie / brodziku / umywalce
+Wymiana starego silikonu
+
+Jednostka wyceny: m² / mb
+
+6. Łazienki
+Kompleksowe wykończenie łazienki
+Przygotowanie pomieszczenia
+Hydroizolacja
+Układanie płytek
+Montaż armatury
+Montaż ceramiki
+Montaż mebli
+Silikonowanie
+Wykończenie końcowe
+
+Jednostka wyceny: całość / m²
+
+Montaż sanitariatów
+Montaż WC
+Montaż stelaża podtynkowego
+Montaż umywalki
+Montaż szafki pod umywalkę
+Montaż wanny
+Montaż brodzika
+Montaż kabiny prysznicowej
+Montaż baterii
+Montaż odpływu liniowego
+
+Jednostka wyceny: szt.
+
+Dodatki łazienkowe
+Montaż lustra
+Montaż półek
+Montaż uchwytów
+Montaż wieszaka
+Montaż grzejnika łazienkowego
+Montaż wentylatora
+Montaż akcesoriów
+
+Jednostka wyceny: szt.
+
+7. Kuchnie
+Przygotowanie kuchni
+Demontaż starej kuchni
+Przygotowanie ścian
+Przygotowanie podłogi
+Przesunięcia punktów
+Montaż płytek między szafkami
+
+Jednostka wyceny: całość / m² / punkt
+
+Montaż elementów kuchennych
+Montaż szafek dolnych
+Montaż szafek wiszących
+Montaż blatu
+Docinanie blatu
+Otwór pod zlew
+Otwór pod płytę
+Montaż zlewu
+Montaż baterii
+Montaż sprzętu AGD
+
+Jednostka wyceny: mb / szt. / komplet
+
+Wykończenie kuchni
+Silikonowanie blatu
+Montaż cokołów
+Montaż listew przyblatowych
+Regulacja frontów
+Montaż uchwytów
+Montaż panelu ściennego
+
+Jednostka wyceny: mb / szt.
+
+8. Drzwi i stolarka
+Drzwi wewnętrzne
+Demontaż starych drzwi
+Montaż ościeżnicy
+Montaż skrzydła
+Regulacja drzwi
+Montaż klamki
+Montaż opasek
+Podcięcie drzwi
+
+Jednostka wyceny: szt.
+
+Obróbki stolarskie
+Obróbka futryn
+Montaż parapetów
+Montaż progów
+Montaż maskownic
+Docinki i dopasowania
+
+Jednostka wyceny: szt. / mb
+
+9. Instalacje elektryczne — prace wykończeniowe
+Punkty elektryczne
+Montaż gniazdka
+Montaż włącznika
+Montaż puszki
+Przesunięcie punktu
+Dołożenie punktu
+Wymiana osprzętu
+
+Jednostka wyceny: punkt / szt.
+
+Oświetlenie
+Montaż lampy
+Montaż plafonu
+Montaż kinkietu
+Montaż taśmy LED
+Montaż profilu LED
+Montaż zasilacza LED
+Montaż czujnika ruchu
+
+Jednostka wyceny: szt. / mb / punkt
+
+Drobne prace elektryczne
+Podłączenie płyty
+Podłączenie piekarnika
+Podłączenie wentylatora
+Sprawdzenie punktów
+Wymiana opraw
+
+Jednostka wyceny: szt. / punkt
+
+10. Instalacje hydrauliczne — prace wykończeniowe
+Podłączenia
+Podłączenie umywalki
+Podłączenie zlewu
+Podłączenie pralki
+Podłączenie zmywarki
+Podłączenie WC
+Podłączenie baterii
+Podłączenie odpływu
+
+Jednostka wyceny: szt.
+
+Przeróbki punktów
+Przesunięcie punktu wody
+Przesunięcie odpływu
+Wymiana zaworów
+Montaż syfonu
+Montaż filtrów
+Uszczelnienia
+
+Jednostka wyceny: punkt / szt.
+
+11. Wykończenia dekoracyjne
+Ściany dekoracyjne
+Panele ścienne
+Lamele
+Beton dekoracyjny
+Tynk dekoracyjny
+Sztukateria
+Listwy ścienne
+Tapeta dekoracyjna
+
+Jednostka wyceny: m² / mb / szt.
+
+Zabudowy i akcenty
+Ściana TV
+Zabudowa kominka
+Wnęki LED
+Półki dekoracyjne
+Maskownice
+Obudowy rur
+
+Jednostka wyceny: całość / mb / m²
+
+12. Prace montażowe
+Montaż mebli i wyposażenia
+Montaż szafek
+Montaż półek
+Montaż luster
+Montaż karniszy
+Montaż rolet
+Montaż telewizora
+Montaż obrazów
+Montaż uchwytów
+
+Jednostka wyceny: szt.
+
+Drobne naprawy
+Regulacja drzwi
+Regulacja szafek
+Wymiana zawiasów
+Wymiana uchwytów
+Naprawa listew
+Poprawki po innych ekipach
+
+Jednostka wyceny: godzina / szt. / całość
+
+13. Prace końcowe
+Poprawki i wykończenie
+Akrylowanie narożników
+Silikonowanie
+Malowanie poprawek
+Czyszczenie po pracach
+Usuwanie taśm
+Kontrola jakości
+
+Jednostka wyceny: godzina / mb / całość
+
+Sprzątanie po remoncie
+Odkurzanie
+Mycie powierzchni
+Usuwanie pyłu
+Wynoszenie odpadów
+Przygotowanie do odbioru
+
+Jednostka wyceny: m² / godzina / całość
+
+Dodatkowe pozycje do każdej wyceny
+Materiały
+Materiały po stronie klienta
+Materiały po stronie wykonawcy
+Zakup materiałów
+Transport materiałów
+Drobne materiały montażowe
+Kleje, grunty, silikony, akryle, taśmy, folie
+
+Jednostka wyceny: koszt rzeczywisty + marża / ryczałt / pozycja osobna
+
+Dojazd
+Dojazd lokalny
+Dojazd poza standardową strefą
+Parking
+Opłaty dodatkowe
+
+Jednostka wyceny: km / dzień / ryczałt
+
+Minimalna wartość zlecenia
+Małe prace do 2 godzin
+Prace jednodniowe
+Prace awaryjne
+Poprawki po innych wykonawcach
+
+Jednostka wyceny: minimum za wizytę / godzina / całość

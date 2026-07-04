@@ -1,11 +1,11 @@
-export type MeasurementType = 'floor' | 'wall' | 'roof';
+export type MeasurementType = 'floor' | 'wall' | 'linear' | 'count';
 
 export interface WorkType {
   id: string;
   slug: string;
   categorySlug: string;
   unit: string;
-  iconName: string;
+  emoji: string;
   measurementType: MeasurementType;
   translations: Record<string, { name: string; categoryName: string }>;
 }
@@ -30,9 +30,9 @@ export interface WycenaPosition {
   id: string;
   workTypeId: string;
   workTypeName: string;
-  workTypeIconName: string;
+  workTypeEmoji: string;
   workTypeUnit: string;
-  area: number;
+  area: number;        // m², mb, or count (szt.) depending on measurementType
   pricePerUnit: number;
   totalPrice: number;
 }
