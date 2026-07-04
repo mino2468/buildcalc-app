@@ -25,7 +25,7 @@ import { getWorkTypeById } from '@/data/workTypes';
 import { CURRENCIES, getCurrencyByCode, getCurrencyName } from '@/data/currencies';
 import { getPriceRateByCurrency } from '@/data/priceRates';
 import { t } from '@/data/translations';
-import { pendingWorkTypeId, setPendingWorkTypeId } from '@/utils/calcStore';
+import { getPendingWorkTypeId, setPendingWorkTypeId } from '@/utils/calcStore';
 import { printEstimate } from '@/utils/printEstimate';
 import type { Estimate } from '@/types';
 
@@ -66,8 +66,9 @@ export default function CalculatorScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      if (pendingWorkTypeId) {
-        const newId = pendingWorkTypeId;
+      const pending = getPendingWorkTypeId();
+      if (pending) {
+        const newId = pending;
         setPendingWorkTypeId(null);
         setWorkTypeId(newId);
         setDim1('');
