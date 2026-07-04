@@ -3,13 +3,22 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Builder Pricer API – construction work estimation tool
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: work-types
+    description: Construction work type operations
+  - name: countries
+    description: Country and currency operations
+  - name: price-rates
+    description: Price rate operations per country and work type
+  - name: estimates
+    description: Quote estimate operations
+
 paths:
   /healthz:
     get:
@@ -24,6 +33,186 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /work-types:
+    get:
+      operationId: listWorkTypes
+      tags: [work-types]
+      summary: List all work types
+      parameters:
+        - name: lang
+          in: query
+          schema:
+            type: string
+          description: Language code (e.g. pl, en, de, fr, uk, es)
+      responses:
+        "200":
+          description: List of work types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WorkType"
+
+  /work-types/{id}:
+    get:
+      operationId: getWorkType
+      tags: [work-types]
+      summary: Get a specific work type
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: lang
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Work type
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkType"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /countries:
+    get:
+      operationId: listCountries
+      tags: [countries]
+      summary: List all supported countries
+      responses:
+        "200":
+          description: List of countries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Country"
+
+  /price-rates:
+    get:
+      operationId: listPriceRates
+      tags: [price-rates]
+      summary: List price rates, optionally filtered by country or work type
+      parameters:
+        - name: countryCode
+          in: query
+          schema:
+            type: string
+          description: ISO country code (e.g. PL, DE, FR)
+        - name: workTypeId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of price rates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PriceRate"
+
+  /estimates:
+    get:
+      operationId: listEstimates
+      tags: [estimates]
+      summary: List all estimates
+      responses:
+        "200":
+          description: List of estimates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Estimate"
+    post:
+      operationId: createEstimate
+      tags: [estimates]
+      summary: Create a new estimate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EstimateInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Estimate"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /estimates/summary:
+    get:
+      operationId: getEstimatesSummary
+      tags: [estimates]
+      summary: Get aggregated summary of all saved estimates
+      responses:
+        "200":
+          description: Summary data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EstimatesSummary"
+
+  /estimates/{id}:
+    get:
+      operationId: getEstimate
+      tags: [estimates]
+      summary: Get a specific estimate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Estimate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Estimate"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteEstimate
+      tags: [estimates]
+      summary: Delete an estimate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +223,210 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    WorkType:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        name:
+          type: string
+          description: Translated name in the requested language
+        unit:
+          type: string
+          description: "Unit of measurement: m2, m, piece"
+        categorySlug:
+          type: string
+          description: Category slug for grouping (e.g. flooring, painting, roofing)
+        categoryName:
+          type: string
+          description: Translated category name
+        icon:
+          type: string
+          description: Emoji icon representing the work type
+      required:
+        - id
+        - slug
+        - name
+        - unit
+        - categorySlug
+        - categoryName
+        - icon
+
+    Country:
+      type: object
+      properties:
+        code:
+          type: string
+          description: ISO 3166-1 alpha-2 country code
+        name:
+          type: string
+        currencyCode:
+          type: string
+        currencySymbol:
+          type: string
+        flag:
+          type: string
+          description: Flag emoji
+      required:
+        - code
+        - name
+        - currencyCode
+        - currencySymbol
+        - flag
+
+    PriceRate:
+      type: object
+      properties:
+        id:
+          type: integer
+        workTypeId:
+          type: integer
+        countryCode:
+          type: string
+        pricePerUnit:
+          type: number
+          description: Suggested price per unit in the country's currency
+        priceMin:
+          type: number
+        priceMax:
+          type: number
+        currencyCode:
+          type: string
+        currencySymbol:
+          type: string
+      required:
+        - id
+        - workTypeId
+        - countryCode
+        - pricePerUnit
+        - priceMin
+        - priceMax
+        - currencyCode
+        - currencySymbol
+
+    Estimate:
+      type: object
+      properties:
+        id:
+          type: integer
+        workTypeId:
+          type: integer
+        workTypeName:
+          type: string
+        workTypeIcon:
+          type: string
+        countryCode:
+          type: string
+        countryName:
+          type: string
+        area:
+          type: number
+          description: Area in square meters (or quantity)
+        unit:
+          type: string
+        pricePerUnit:
+          type: number
+        totalPrice:
+          type: number
+        currencyCode:
+          type: string
+        currencySymbol:
+          type: string
+        label:
+          type: ["string", "null"]
+          description: Optional user-provided label for this estimate
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - workTypeId
+        - workTypeName
+        - workTypeIcon
+        - countryCode
+        - countryName
+        - area
+        - unit
+        - pricePerUnit
+        - totalPrice
+        - currencyCode
+        - currencySymbol
+        - label
+        - createdAt
+
+    EstimateInput:
+      type: object
+      properties:
+        workTypeId:
+          type: integer
+        countryCode:
+          type: string
+        area:
+          type: number
+        pricePerUnit:
+          type: number
+        label:
+          type: string
+      required:
+        - workTypeId
+        - countryCode
+        - area
+        - pricePerUnit
+
+    EstimatesSummary:
+      type: object
+      properties:
+        totalEstimates:
+          type: integer
+        totalValue:
+          type: number
+        byCurrency:
+          type: array
+          items:
+            type: object
+            properties:
+              currencyCode:
+                type: string
+              currencySymbol:
+                type: string
+              total:
+                type: number
+              count:
+                type: integer
+            required:
+              - currencyCode
+              - currencySymbol
+              - total
+              - count
+        byCategory:
+          type: array
+          items:
+            type: object
+            properties:
+              categorySlug:
+                type: string
+              count:
+                type: integer
+            required:
+              - categorySlug
+              - count
+        recentEstimates:
+          type: array
+          items:
+            $ref: "#/components/schemas/Estimate"
+      required:
+        - totalEstimates
+        - totalValue
+        - byCurrency
+        - byCategory
+        - recentEstimates

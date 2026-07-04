@@ -1,0 +1,1 @@
+- [BuildCalc mobile architecture](buildcalc-mobile.md) — frontend-only Expo app; calcStore singleton passes work type selection between modal and tab screen.
