@@ -349,14 +349,20 @@ export default function CalculatorScreen() {
             </View>
 
             {/* Total */}
-            <View style={[styles.totalCard, { backgroundColor: colors.primary }]}>
-              <Text style={[styles.totalLabel, { color: 'rgba(255,255,255,0.75)' }]}>
-                {t(language, 'totalPrice')} · {areaNum} {workType.unit}
-              </Text>
-              <Text style={styles.totalValue}>
-                {fmtTotal}{' '}
-                <Text style={styles.totalCurrency}>{country?.currencySymbol}</Text>
-              </Text>
+            <View style={[styles.totalCard, { borderColor: colors.border }]}>
+              <View style={[styles.totalAccent, { backgroundColor: colors.primary }]} />
+              <View style={styles.totalInner}>
+                <Text style={[styles.totalLabel, { color: colors.mutedForeground }]}>
+                  {t(language, 'totalPrice')}
+                </Text>
+                <Text style={[styles.totalMeta, { color: colors.mutedForeground }]}>
+                  {areaNum} {workType.unit} × {priceNum} {country?.currencySymbol}
+                </Text>
+              </View>
+              <View style={styles.totalAmountWrap}>
+                <Text style={[styles.totalValue, { color: colors.foreground }]}>{fmtTotal}</Text>
+                <Text style={[styles.totalCurrency, { color: colors.primary }]}>{country?.currencySymbol}</Text>
+              </View>
             </View>
 
             {/* Save & Print */}
@@ -524,13 +530,17 @@ const styles = StyleSheet.create({
   },
   rangeHint: { fontSize: 12, fontFamily: 'Inter_400Regular', textAlign: 'center', marginTop: -4 },
   totalCard: {
-    padding: 20, borderRadius: 16, marginTop: 12, alignItems: 'center',
-    shadowColor: '#EA580C', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.28, shadowRadius: 12, elevation: 6,
+    flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1, borderRadius: 14, marginTop: 12,
+    overflow: 'hidden',
   },
-  totalLabel: { fontSize: 11, fontFamily: 'Inter_500Medium', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 },
-  totalValue: { fontSize: 44, fontFamily: 'Inter_700Bold', color: '#fff', lineHeight: 52 },
-  totalCurrency: { fontSize: 24, fontFamily: 'Inter_500Medium', color: 'rgba(255,255,255,0.78)' },
+  totalAccent: { width: 3, alignSelf: 'stretch' },
+  totalInner: { flex: 1, paddingVertical: 16, paddingHorizontal: 14, gap: 3 },
+  totalLabel: { fontSize: 10, fontFamily: 'Inter_600SemiBold', textTransform: 'uppercase', letterSpacing: 0.8 },
+  totalMeta: { fontSize: 12, fontFamily: 'Inter_400Regular' },
+  totalAmountWrap: { flexDirection: 'row', alignItems: 'baseline', paddingRight: 16, gap: 4 },
+  totalValue: { fontSize: 32, fontFamily: 'Inter_700Bold' },
+  totalCurrency: { fontSize: 16, fontFamily: 'Inter_600SemiBold' },
   labelInput: { height: 46, borderWidth: 1, borderRadius: 10, paddingHorizontal: 14, fontSize: 15, fontFamily: 'Inter_400Regular' },
   saveBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 52, borderRadius: 12, gap: 8 },
   saveBtnText: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: '#fff' },
