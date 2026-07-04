@@ -1,42 +1,43 @@
 ---
 name: BuildCalc mobile architecture
-description: Key decisions for the BuildCalc Expo/React Native app (artifacts/builder-pricer-mobile)
+description: Key architectural decisions for the BuildCalc Expo mobile app (artifacts/builder-pricer-mobile)
 ---
 
-## Architecture
+## UX model: multi-position Wycena builder (ewyceniarka.pl-style)
 
-- **Frontend-only** — no backend. All data hardcoded in `data/`. Persistence via AsyncStorage.
-- **Languages**: pl, en, de, fr, uk, es, cs (7 languages). Stored in `data/translations.ts`.
-- **Countries**: PL, DE, GB, FR, NL, BE, AT, CH, CZ, SE, NO, UA, ES (13). Stored in `data/countries.ts`.
-- **Work types**: 15 types across 7 categories. Stored in `data/workTypes.ts`.
-- **Price rates**: one `PriceRate` per `{workTypeId, countryCode}` pair in `data/priceRates.ts`.
+The app now works like a construction quote builder, not a single-item calculator:
+- **Wycena** = one complete estimate document with multiple positions (roboty)
+- User adds positions one by one (select work type → dims → area → price → confirm)
+- Client name/address optional at top
+- VAT picker at bottom (0% / 8% / 23%)
+- Save → persists full document; Print → generates professional HTML→PDF kosztorys
 
-## Cross-screen state: work type selection
+**Why:** Owner wanted the flow similar to ewyceniarka.pl (document-centric, not item-centric).
 
-Work type picker (`app/work-type-select.tsx`) is a Stack modal. To pass selection back to Calculator tab without router params or extra context, we use a module singleton:
+## Context: WycenasContext replaces EstimatesContext
 
-```ts
-// utils/calcStore.ts
-export let pendingWorkTypeId: string | null = null;
-export function setPendingWorkTypeId(id: string | null) { pendingWorkTypeId = id; }
-```
+- `context/WycenasContext.tsx` — stores `Wycena[]` in AsyncStorage key `buildcalc_wycenas_v2`
+- Sequential numbering uses a `useRef` (counterRef) incremented atomically — prevents duplicate document numbers on rapid taps
+- `addWycena()` returns the created `Wycena` synchronously so callers (save+print flow) use the exact same document with its correct number
 
-Calculator reads it in `useFocusEffect` on screen focus. Set to null after reading.
+**How to apply:** Always use the returned value from `addWycena` for post-save operations (e.g. printing). Never read `nextNumber` after calling `addWycena` for the just-created doc — it's already incremented.
 
-**Why:** Expo Router doesn't support function callbacks as route params. Context would cause re-renders. Module singleton is simple and effective.
+## calcStore singleton: always use getter
 
-## Price calculation edge case
+`getPendingWorkTypeId()` getter must be used in `useFocusEffect` callbacks, not the bare `export let pendingWorkTypeId` (Metro snapshots the value at null).
 
-`customPrice` field uses `customPrice !== '' ? parseFloat(customPrice) : rate.avg` — NOT `parseFloat(customPrice) || rate.avg`, because the `||` form treats "0" as falsy and reverts to avg.
+## Ionicons on Android
 
-## Language → country defaults
+`...Ionicons.font` must be included in the `useFonts()` call in `app/_layout.tsx`. Without it, Ionicons renders as empty boxes on Android.
 
-Each language maps to a sensible default country on first launch (in `language-select.tsx`). Spanish ('es') maps to 'ES' (Spain). All countries must exist in `data/countries.ts`.
+## Translations
 
-## Tab layout
+Clean, non-duplicate `TranslationKeys` interface. Adding keys: update the interface type block AND all 7 language objects in `data/translations.ts`. Use node script only for simple appends; for structural changes, rewrite the file cleanly to avoid duplicate key TS errors. Never use a generic dedup regex script on this file — it corrupts values.
 
-Uses `expo-router` Tabs + Ionicons. NativeTabs / expo-glass-effect were removed (Android focus). `expo-blur` is still used for iOS tab bar background.
+## Types
 
-## Shadow style warning
+`Estimate` is deprecated (kept for backward compat). New types: `WycenaPosition` (one line item) + `Wycena` (full document with positions, VAT, client info, sequential number).
 
-React Native web shows deprecation warning for `shadow*` style props. Non-critical.
+## Print
+
+`utils/printWycena.ts` — generates HTML kosztorys with professional layout (company header, client block, position table with Lp/nazwa/ilość/cena/wartość, VAT rows, brutto total). Uses `expo-print` + `expo-sharing`.

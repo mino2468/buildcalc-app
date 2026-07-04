@@ -37,7 +37,7 @@ export default function WorkTypeSelectScreen() {
 
   const sections = useMemo(() => {
     if (filteredItems) return [];
-    const byCategory = getWorkTypesByCategory(language);
+    const byCategory = getWorkTypesByCategory();
     return CATEGORY_ORDER
       .filter((cat) => byCategory[cat]?.length)
       .map((cat) => ({

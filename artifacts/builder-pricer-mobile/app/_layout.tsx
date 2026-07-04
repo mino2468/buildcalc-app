@@ -14,8 +14,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { AppProvider } from '@/context/AppContext';
-import { EstimatesProvider } from '@/context/EstimatesContext';
 import { CompanyProvider } from '@/context/CompanyContext';
+import { WycenasProvider } from '@/context/WycenasContext';
 import { setRatesFromServer } from '@/data/priceRates';
 
 SplashScreen.preventAutoHideAsync();
@@ -71,13 +71,13 @@ export default function RootLayout() {
       <ErrorBoundary>
         <AppProvider>
           <CompanyProvider>
-            <EstimatesProvider>
+            <WycenasProvider>
               <GestureHandlerRootView style={{ flex: 1 }}>
                 <KeyboardProvider>
                   <RootLayoutNav />
                 </KeyboardProvider>
               </GestureHandlerRootView>
-            </EstimatesProvider>
+            </WycenasProvider>
           </CompanyProvider>
         </AppProvider>
       </ErrorBoundary>

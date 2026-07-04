@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  FlatList,
+  Alert,
   KeyboardAvoidingView,
-  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -18,126 +17,162 @@ import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '@/context/AppContext';
 import { useCompany } from '@/context/CompanyContext';
-import { useEstimates } from '@/context/EstimatesContext';
+import { useWycenas } from '@/context/WycenasContext';
 import { useColors } from '@/hooks/useColors';
-import { PriceDisplay } from '@/components/PriceDisplay';
 import { getWorkTypeById } from '@/data/workTypes';
-import { COUNTRIES, getCountryByCode, getCountryName } from '@/data/countries';
+import { getCountryByCode } from '@/data/countries';
 import { getPriceRate } from '@/data/priceRates';
 import { t } from '@/data/translations';
 import { getPendingWorkTypeId, setPendingWorkTypeId } from '@/utils/calcStore';
-import { printEstimate } from '@/utils/printEstimate';
-import type { Estimate } from '@/types';
+import { printWycena } from '@/utils/printWycena';
+import type { WycenaPosition } from '@/types';
+
+const VAT_OPTIONS = [0, 8, 23];
 
 export default function CalculatorScreen() {
-  const { language, countryCode, setCountryCode } = useApp();
+  const { language, countryCode } = useApp();
   const { company } = useCompany();
-  const { addEstimate } = useEstimates();
+  const { nextNumber, addWycena } = useWycenas();
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     navigation.setOptions({ title: t(language, 'calculator') });
   }, [language]);
 
-  const [workTypeId, setWorkTypeId] = useState<string | null>(null);
-  const [dim1, setDim1] = useState('');
-  const [dim2, setDim2] = useState('');
-  const [area, setArea] = useState('');
-  const [customPrice, setCustomPrice] = useState('');
-  const [label, setLabel] = useState('');
-  const [showCountryPicker, setShowCountryPicker] = useState(false);
-  const [justSaved, setJustSaved] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Estimate | null>(null);
-
-  const workType = workTypeId ? getWorkTypeById(workTypeId) : null;
   const country = getCountryByCode(countryCode);
-  const rate = workType ? getPriceRate(workType.id, countryCode) : null;
 
-  // Auto-calculate area when both dimensions are set
+  // — Document state —
+  const [positions, setPositions]       = useState<WycenaPosition[]>([]);
+  const [clientName, setClientName]     = useState('');
+  const [clientAddress, setClientAddress] = useState('');
+  const [showClient, setShowClient]     = useState(false);
+  const [vatRate, setVatRate]           = useState(0);
+  const [savedWycena, setSavedWycena] = useState<import('@/types').Wycena | null>(null);
+
+  // — Pending position form —
+  const [pendingWTId, setPendingWTId]   = useState<string | null>(null);
+  const [dim1, setDim1]                 = useState('');
+  const [dim2, setDim2]                 = useState('');
+  const [area, setArea]                 = useState('');
+  const [price, setPrice]               = useState('');
+
+  const pendingWT = pendingWTId ? getWorkTypeById(pendingWTId) : null;
+  const rate       = pendingWT ? getPriceRate(pendingWT.id, countryCode) : null;
+
+  // Auto-compute area from dims
   useEffect(() => {
-    const d1 = parseFloat(dim1);
-    const d2 = parseFloat(dim2);
-    if (d1 > 0 && d2 > 0) {
-      setArea((d1 * d2).toFixed(2));
-    }
+    const d1 = parseFloat(dim1), d2 = parseFloat(dim2);
+    if (d1 > 0 && d2 > 0) setArea((d1 * d2).toFixed(2));
   }, [dim1, dim2]);
 
+  // Pick up pending work type from work-type-select screen
   useFocusEffect(
     useCallback(() => {
       const pending = getPendingWorkTypeId();
       if (pending) {
-        const newId = pending;
         setPendingWorkTypeId(null);
-        setWorkTypeId(newId);
-        setDim1('');
-        setDim2('');
-        setArea('');
-        const newRate = getPriceRate(newId, countryCode);
-        if (newRate) setCustomPrice(newRate.avg.toString());
-        setJustSaved(false);
-        setLastSaved(null);
+        setPendingWTId(pending);
+        setDim1(''); setDim2(''); setArea('');
+        const r = getPriceRate(pending, countryCode);
+        setPrice(r ? r.avg.toString() : '');
+        setSavedWycena(null);
+        setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 200);
       }
     }, [countryCode]),
   );
 
-  // When country changes, refresh the suggested price
-  useEffect(() => {
-    if (workTypeId) {
-      const newRate = getPriceRate(workTypeId, countryCode);
-      if (newRate) setCustomPrice(newRate.avg.toString());
-      else setCustomPrice('');
-    }
-  }, [countryCode, workTypeId]);
+  // — Computed totals —
+  const totalNet   = positions.reduce((s, p) => s + p.totalPrice, 0);
+  const totalVat   = Math.round(totalNet * vatRate / 100 * 100) / 100;
+  const totalGross = totalNet + totalVat;
 
-  const areaNum = parseFloat(area) || 0;
-  const priceNum = customPrice !== '' ? (parseFloat(customPrice) || 0) : (rate?.avg ?? 0);
-  const total = areaNum * priceNum;
+  const areaNum  = parseFloat(area)  || 0;
+  const priceNum = parseFloat(price) || (rate?.avg ?? 0);
 
-  const dim1Label = workType?.measurementType === 'wall' ? t(language, 'width') : t(language, 'length');
-  const dim2Label = workType?.measurementType === 'wall' ? t(language, 'height') : t(language, 'width');
+  // — Dim labels —
+  const dim1Label = pendingWT?.measurementType === 'wall' ? t(language, 'width') : t(language, 'length');
+  const dim2Label = pendingWT?.measurementType === 'wall' ? t(language, 'height') : t(language, 'width');
 
-  const handleSave = () => {
-    if (!workType || !country || areaNum === 0) return;
-    const workTypeName =
-      workType.translations[language]?.name ?? workType.translations['en']?.name ?? workType.slug;
-    const est: Omit<Estimate, 'id' | 'createdAt'> = {
-      workTypeId: workType.id,
-      workTypeName,
-      workTypeIconName: workType.iconName,
-      workTypeUnit: workType.unit,
-      currencyCode: country.currencyCode,
-      currencySymbol: country.currencySymbol,
+  // — Actions —
+  const handleAddPosition = () => {
+    if (!pendingWT || !country || areaNum === 0) return;
+    const name = pendingWT.translations[language]?.name ?? pendingWT.translations['en']?.name ?? pendingWT.slug;
+    const pos: WycenaPosition = {
+      id: Date.now().toString(),
+      workTypeId: pendingWT.id,
+      workTypeName: name,
+      workTypeIconName: pendingWT.iconName,
+      workTypeUnit: pendingWT.unit,
       area: areaNum,
       pricePerUnit: priceNum,
-      totalPrice: total,
-      label: label.trim(),
+      totalPrice: Math.round(areaNum * priceNum * 100) / 100,
     };
-    addEstimate(est);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setPositions((prev) => [...prev, pos]);
+    setPendingWTId(null);
+    setDim1(''); setDim2(''); setArea(''); setPrice('');
+    setSavedWycena(null);
+  };
+
+  const handleDeletePosition = (id: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setPositions((prev) => prev.filter((p) => p.id !== id));
+    setSavedWycena(null);
+  };
+
+  const handleSave = () => {
+    if (!country || positions.length === 0) return;
+    // addWycena returns the created document synchronously (with correct id + number)
+    const created = addWycena({
+      clientName, clientAddress, countryCode,
+      currencyCode: country.currencyCode,
+      currencySymbol: country.currencySymbol,
+      positions, totalNet, vatRate, totalVat, totalGross,
+    });
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setJustSaved(true);
-    setLastSaved({ ...est, id: Date.now().toString(), createdAt: new Date().toISOString() });
-    setLabel('');
-    setTimeout(() => setJustSaved(false), 3000);
+    setSavedWycena(created);
   };
 
   const handlePrint = async () => {
-    if (!lastSaved) return;
+    if (!country || positions.length === 0) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await printEstimate(lastSaved, company);
+    // Use the already-saved document if available; otherwise build a preview doc.
+    // Crucially: we never use nextNumber here — it was already incremented after save.
+    const doc = savedWycena ?? {
+      id: 'tmp',
+      number: nextNumber,
+      createdAt: new Date().toISOString(),
+      clientName, clientAddress, countryCode,
+      currencyCode: country.currencyCode,
+      currencySymbol: country.currencySymbol,
+      positions, totalNet, vatRate, totalVat, totalGross,
+    };
+    await printWycena(doc, company);
   };
 
-  const fmtTotal =
-    total >= 1000
-      ? total.toLocaleString('en-US', { maximumFractionDigits: 0 })
-      : total.toFixed(2);
-
-  const workTypeName = workType
-    ? (workType.translations[language]?.name ?? workType.translations['en']?.name)
-    : null;
+  const handleNew = () => {
+    if (positions.length === 0 && !clientName) return;
+    Alert.alert(t(language, 'clearEstimate'), t(language, 'confirmDelete'), [
+      { text: t(language, 'cancel'), style: 'cancel' },
+      {
+        text: t(language, 'confirm'), style: 'destructive',
+        onPress: () => {
+          setPositions([]);
+          setClientName('');
+          setClientAddress('');
+          setPendingWTId(null);
+          setVatRate(0);
+          setSavedWycena(null);
+        },
+      },
+    ]);
+  };
 
   const topPad = Platform.OS === 'web' ? 80 : insets.top + 16;
+  const sym = country?.currencySymbol ?? '';
 
   return (
     <KeyboardAvoidingView
@@ -146,421 +181,354 @@ export default function CalculatorScreen() {
     >
       <StatusBar barStyle="dark-content" />
       <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={[styles.scroll, { paddingTop: topPad }]}
-        showsVerticalScrollIndicator={false}
+        ref={scrollRef}
+        contentContainerStyle={[styles.scroll, { paddingTop: topPad, paddingBottom: insets.bottom + 96 }]}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
+
+        {/* ── Header ───────────────────────────────────────── */}
         <View style={styles.pageHeader}>
-          <Text style={[styles.pageTitle, { color: colors.foreground }]}>
-            {t(language, 'calculator')}
-          </Text>
-          <Pressable
-            onPress={() => setShowCountryPicker(true)}
-            style={({ pressed }) => [
-              styles.countryPill,
-              { backgroundColor: colors.secondary, borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
-            ]}
-          >
-            <Text style={[styles.pillCode, { color: colors.primary }]}>{countryCode}</Text>
-            <Text style={[styles.pillSymbol, { color: colors.mutedForeground }]}>
-              {country?.currencySymbol}
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.pageTitle, { color: colors.foreground }]}>
+              {t(language, 'estimateNo')} #{nextNumber}
             </Text>
-            <Ionicons name="chevron-down" size={13} color={colors.mutedForeground} />
-          </Pressable>
+            <Text style={[styles.pageCountry, { color: colors.mutedForeground }]}>
+              {countryCode} · {sym}
+            </Text>
+          </View>
+          {positions.length > 0 && (
+            <Pressable onPress={handleNew} hitSlop={8}
+              style={({ pressed }) => [styles.newBtn, { borderColor: colors.border, opacity: pressed ? 0.6 : 1 }]}>
+              <Ionicons name="add-circle-outline" size={14} color={colors.mutedForeground} />
+              <Text style={[styles.newBtnText, { color: colors.mutedForeground }]}>{t(language, 'clearEstimate')}</Text>
+            </Pressable>
+          )}
         </View>
 
-        {/* Work type selector */}
+        {/* ── Client data ──────────────────────────────────── */}
         <Pressable
-          onPress={() => router.push('/work-type-select')}
-          style={({ pressed }) => [
-            styles.workTypeBtn,
-            {
-              backgroundColor: workType ? colors.card : colors.accent,
-              borderColor: workType ? colors.border : colors.primary,
-              borderStyle: workType ? 'solid' : 'dashed',
-              opacity: pressed ? 0.75 : 1,
-            },
-          ]}
+          onPress={() => setShowClient((v) => !v)}
+          style={[styles.clientToggle, { backgroundColor: colors.card, borderColor: colors.border }]}
         >
-          {workType ? (
-            <>
-              <View style={[styles.wtIcon, { backgroundColor: colors.accent }]}>
-                <Ionicons name={workType.iconName as any} size={24} color={colors.primary} />
-              </View>
-              <View style={styles.wtTextWrap}>
-                <Text style={[styles.wtName, { color: colors.foreground }]} numberOfLines={2}>
-                  {workTypeName}
-                </Text>
-                <Text style={[styles.wtUnit, { color: colors.mutedForeground }]}>
-                  {t(language, 'pricePerUnit')}
-                </Text>
-              </View>
-              <Text style={[styles.changeText, { color: colors.primary }]}>
-                {t(language, 'changeWorkType')}
-              </Text>
-            </>
-          ) : (
-            <>
-              <View style={[styles.wtIcon, { backgroundColor: colors.primary }]}>
-                <Ionicons name="add" size={28} color="#fff" />
-              </View>
-              <Text style={[styles.selectText, { color: colors.primary }]}>
-                {t(language, 'selectWorkType')}
-              </Text>
-            </>
-          )}
+          <Ionicons name="person-outline" size={15} color={colors.mutedForeground} />
+          <Text style={[styles.clientToggleText, { color: clientName ? colors.foreground : colors.mutedForeground }]}>
+            {clientName || t(language, 'clientInfo')}
+          </Text>
+          <Ionicons name={showClient ? 'chevron-up' : 'chevron-down'} size={14} color={colors.mutedForeground} />
         </Pressable>
+        {showClient && (
+          <View style={[styles.clientForm, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <TextInput
+              value={clientName}
+              onChangeText={setClientName}
+              placeholder={t(language, 'clientName')}
+              placeholderTextColor={colors.mutedForeground}
+              style={[styles.clientInput, { color: colors.foreground, borderColor: colors.border }]}
+            />
+            <TextInput
+              value={clientAddress}
+              onChangeText={setClientAddress}
+              placeholder={t(language, 'clientAddress')}
+              placeholderTextColor={colors.mutedForeground}
+              style={[styles.clientInput, { color: colors.foreground, borderColor: colors.border }]}
+            />
+          </View>
+        )}
 
-        {workType && (
-          <>
-            {/* Market rate hint */}
-            {rate ? (
-              <PriceDisplay rate={rate} lang={language} currencySymbol={country?.currencySymbol ?? ''} />
-            ) : (
-              <View style={[styles.noRate, { backgroundColor: colors.secondary, borderColor: colors.border }]}>
-                <Ionicons name="information-circle-outline" size={18} color={colors.mutedForeground} />
-                <Text style={[styles.noRateText, { color: colors.mutedForeground }]}>
-                  {t(language, 'noRateAvailable')}
+        {/* ── Positions list ───────────────────────────────── */}
+        {positions.length > 0 && (
+          <View style={[styles.positionsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
+              {t(language, 'positions')} ({positions.length})
+            </Text>
+            {positions.map((p, i) => (
+              <View key={p.id}>
+                {i > 0 && <View style={[styles.posDivider, { backgroundColor: colors.border }]} />}
+                <View style={styles.posRow}>
+                  <Text style={[styles.posNum, { color: colors.mutedForeground }]}>{i + 1}</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.posName, { color: colors.foreground }]} numberOfLines={1}>{p.workTypeName}</Text>
+                    <Text style={[styles.posMeta, { color: colors.mutedForeground }]}>
+                      {p.area} {p.workTypeUnit} × {p.pricePerUnit} {sym}
+                    </Text>
+                  </View>
+                  <Text style={[styles.posTotal, { color: colors.foreground }]}>
+                    {p.totalPrice.toLocaleString('pl-PL', { maximumFractionDigits: 0 })} {sym}
+                  </Text>
+                  <Pressable onPress={() => handleDeletePosition(p.id)} hitSlop={10}>
+                    <Ionicons name="close-circle-outline" size={20} color={colors.destructive} />
+                  </Pressable>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* ── Pending position form ────────────────────────── */}
+        {pendingWT ? (
+          <View style={[styles.pendingCard, { backgroundColor: colors.card, borderColor: colors.primary }]}>
+            {/* Work type header */}
+            <View style={styles.pendingHeader}>
+              <Ionicons name={pendingWT.iconName as any} size={20} color={colors.primary} />
+              <Text style={[styles.pendingWTName, { color: colors.foreground }]} numberOfLines={1}>
+                {pendingWT.translations[language]?.name ?? pendingWT.translations['en']?.name}
+              </Text>
+              <Pressable onPress={() => router.push('/work-type-select')} hitSlop={8}>
+                <Text style={[styles.changeLink, { color: colors.primary }]}>{t(language, 'changeWorkType')}</Text>
+              </Pressable>
+            </View>
+
+            {rate && (
+              <Text style={[styles.rateHint, { color: colors.mutedForeground }]}>
+                {t(language, 'priceRange')}: {rate.min}–{rate.max} {sym}
+              </Text>
+            )}
+
+            {/* Dims */}
+            <View style={styles.dimsRow}>
+              <View style={styles.dimCol}>
+                <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>{dim1Label} (m)</Text>
+                <TextInput
+                  value={dim1} onChangeText={(v) => setDim1(v.replace(/[^0-9.]/g, ''))}
+                  keyboardType="decimal-pad" placeholder="0.00"
+                  placeholderTextColor={colors.mutedForeground} selectTextOnFocus
+                  style={[styles.dimInput, { color: colors.foreground, borderColor: colors.border }]}
+                />
+              </View>
+              <Text style={[styles.dimMul, { color: colors.mutedForeground }]}>×</Text>
+              <View style={styles.dimCol}>
+                <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>{dim2Label} (m)</Text>
+                <TextInput
+                  value={dim2} onChangeText={(v) => setDim2(v.replace(/[^0-9.]/g, ''))}
+                  keyboardType="decimal-pad" placeholder="0.00"
+                  placeholderTextColor={colors.mutedForeground} selectTextOnFocus
+                  style={[styles.dimInput, { color: colors.foreground, borderColor: colors.border }]}
+                />
+              </View>
+            </View>
+            {dim1 && dim2 && parseFloat(dim1) > 0 && parseFloat(dim2) > 0 && (
+              <View style={[styles.dimResult, { backgroundColor: colors.accent }]}>
+                <Text style={[styles.dimResultText, { color: colors.primary }]}>
+                  = {(parseFloat(dim1) * parseFloat(dim2)).toFixed(2)} m²
                 </Text>
               </View>
             )}
 
-            {/* Dimension calculator */}
-            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
-                {t(language, 'dimensions')}
-              </Text>
-              <View style={styles.dimsRow}>
-                <View style={styles.dimBox}>
-                  <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>{dim1Label} (m)</Text>
-                  <TextInput
-                    value={dim1}
-                    onChangeText={(v) => setDim1(v.replace(/[^0-9.]/g, ''))}
-                    keyboardType="decimal-pad"
-                    placeholder="0.00"
-                    placeholderTextColor={colors.mutedForeground}
-                    style={[styles.dimInput, { color: colors.foreground, borderColor: colors.border }]}
-                    selectTextOnFocus
-                  />
-                </View>
-                <Text style={[styles.dimMul, { color: colors.mutedForeground }]}>×</Text>
-                <View style={styles.dimBox}>
-                  <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>{dim2Label} (m)</Text>
-                  <TextInput
-                    value={dim2}
-                    onChangeText={(v) => setDim2(v.replace(/[^0-9.]/g, ''))}
-                    keyboardType="decimal-pad"
-                    placeholder="0.00"
-                    placeholderTextColor={colors.mutedForeground}
-                    style={[styles.dimInput, { color: colors.foreground, borderColor: colors.border }]}
-                    selectTextOnFocus
-                  />
-                </View>
-              </View>
-              {dim1 && dim2 && parseFloat(dim1) > 0 && parseFloat(dim2) > 0 && (
-                <View style={[styles.dimResult, { backgroundColor: colors.accent }]}>
-                  <Text style={[styles.dimResultText, { color: colors.primary }]}>
-                    = {(parseFloat(dim1) * parseFloat(dim2)).toFixed(2)} m²
-                  </Text>
-                </View>
-              )}
-              <Text style={[styles.dimOr, { color: colors.mutedForeground }]}>
-                {t(language, 'orEnterDirectly')}
-              </Text>
-            </View>
-
-            {/* Area input */}
-            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
-                {t(language, 'area')}
-              </Text>
-              <View style={styles.areaRow}>
-                <Pressable
-                  onPress={() => {
-                    const n = Math.max(0, (parseFloat(area) || 0) - 1);
-                    setArea(n.toFixed(n % 1 === 0 ? 0 : 2));
-                    setDim1(''); setDim2('');
-                  }}
-                  style={[styles.stepBtn, { backgroundColor: colors.secondary, borderColor: colors.border }]}
-                >
-                  <Ionicons name="remove" size={20} color={colors.foreground} />
-                </Pressable>
+            {/* Area + Price row */}
+            <View style={styles.apRow}>
+              <View style={styles.apCol}>
+                <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>{t(language, 'area')}</Text>
                 <TextInput
                   value={area}
                   onChangeText={(v) => { setArea(v.replace(/[^0-9.]/g, '')); setDim1(''); setDim2(''); }}
-                  keyboardType="decimal-pad"
-                  placeholder="0"
-                  placeholderTextColor={colors.mutedForeground}
-                  style={[styles.areaInput, { color: colors.foreground, borderColor: colors.border }]}
-                  selectTextOnFocus
+                  keyboardType="decimal-pad" placeholder="0"
+                  placeholderTextColor={colors.mutedForeground} selectTextOnFocus
+                  style={[styles.apInput, { color: colors.foreground, borderColor: colors.border }]}
                 />
-                <Pressable
-                  onPress={() => {
-                    const n = (parseFloat(area) || 0) + 1;
-                    setArea(n.toFixed(0));
-                    setDim1(''); setDim2('');
-                  }}
-                  style={[styles.stepBtn, { backgroundColor: colors.secondary, borderColor: colors.border }]}
-                >
-                  <Ionicons name="add" size={20} color={colors.foreground} />
-                </Pressable>
               </View>
-              <View style={styles.quickRow}>
-                {[5, 10, 25, 50, 100].map((d) => (
+              <View style={styles.apCol}>
+                <Text style={[styles.dimLabel, { color: colors.mutedForeground }]}>{t(language, 'pricePerUnit')} ({sym})</Text>
+                <TextInput
+                  value={price} onChangeText={setPrice}
+                  keyboardType="decimal-pad" placeholder={rate?.avg.toString() ?? '0'}
+                  placeholderTextColor={colors.mutedForeground} selectTextOnFocus
+                  style={[styles.apInput, { color: colors.foreground, borderColor: colors.border }]}
+                />
+              </View>
+            </View>
+
+            {/* Row total preview */}
+            {areaNum > 0 && (
+              <View style={[styles.rowTotalBar, { borderColor: colors.border }]}>
+                <Text style={[styles.rowTotalLabel, { color: colors.mutedForeground }]}>
+                  {areaNum} × {priceNum} {sym}
+                </Text>
+                <Text style={[styles.rowTotalValue, { color: colors.foreground }]}>
+                  = {(areaNum * priceNum).toLocaleString('pl-PL', { maximumFractionDigits: 0 })} {sym}
+                </Text>
+              </View>
+            )}
+
+            <Pressable
+              onPress={handleAddPosition}
+              disabled={areaNum === 0}
+              style={({ pressed }) => [
+                styles.addPosBtn,
+                { backgroundColor: colors.primary, opacity: pressed ? 0.85 : areaNum === 0 ? 0.45 : 1 },
+              ]}
+            >
+              <Ionicons name="add" size={18} color="#fff" />
+              <Text style={styles.addPosBtnText}>{t(language, 'addToEstimate')}</Text>
+            </Pressable>
+          </View>
+        ) : (
+          /* ── Add position button ───────────────────────── */
+          <Pressable
+            onPress={() => router.push('/work-type-select')}
+            style={({ pressed }) => [
+              styles.addBtn,
+              { borderColor: colors.primary, backgroundColor: colors.accent, opacity: pressed ? 0.75 : 1 },
+            ]}
+          >
+            <View style={[styles.addBtnIcon, { backgroundColor: colors.primary }]}>
+              <Ionicons name="add" size={24} color="#fff" />
+            </View>
+            <Text style={[styles.addBtnText, { color: colors.primary }]}>{t(language, 'addPosition')}</Text>
+          </Pressable>
+        )}
+
+        {/* ── Summary ──────────────────────────────────────── */}
+        {positions.length > 0 && (
+          <>
+            <View style={[styles.summaryCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
+                {t(language, 'vatRate')}
+              </Text>
+              <View style={styles.vatRow}>
+                {VAT_OPTIONS.map((v) => (
                   <Pressable
-                    key={d}
-                    onPress={() => {
-                      const n = (parseFloat(area) || 0) + d;
-                      setArea(n.toFixed(0));
-                      setDim1(''); setDim2('');
-                    }}
+                    key={v}
+                    onPress={() => setVatRate(v)}
                     style={({ pressed }) => [
-                      styles.quickBtn,
-                      { backgroundColor: pressed ? colors.primary : colors.secondary, borderColor: colors.border },
+                      styles.vatChip,
+                      {
+                        backgroundColor: vatRate === v ? colors.primary : pressed ? colors.secondary : colors.background,
+                        borderColor: vatRate === v ? colors.primary : colors.border,
+                      },
                     ]}
                   >
-                    <Text style={[styles.quickBtnText, { color: colors.mutedForeground }]}>+{d}</Text>
+                    <Text style={[styles.vatChipText, { color: vatRate === v ? '#fff' : colors.foreground }]}>
+                      {v === 0 ? t(language, 'noVat') : `${v}%`}
+                    </Text>
                   </Pressable>
                 ))}
               </View>
-            </View>
 
-            {/* Price per unit */}
-            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
-                {t(language, 'pricePerUnit')} ({country?.currencySymbol})
-              </Text>
-              <TextInput
-                value={customPrice}
-                onChangeText={setCustomPrice}
-                keyboardType="decimal-pad"
-                placeholder={rate ? rate.avg.toString() : '0'}
-                placeholderTextColor={colors.mutedForeground}
-                style={[styles.priceInput, { color: colors.foreground, borderColor: colors.border }]}
-                selectTextOnFocus
-              />
-              {rate && (
-                <Text style={[styles.rangeHint, { color: colors.mutedForeground }]}>
-                  {t(language, 'priceRange')}: {rate.min} – {rate.max} {country?.currencySymbol}
-                </Text>
-              )}
-            </View>
-
-            {/* Total */}
-            <View style={[styles.totalCard, { borderColor: colors.border }]}>
-              <View style={[styles.totalAccent, { backgroundColor: colors.primary }]} />
-              <View style={styles.totalInner}>
-                <Text style={[styles.totalLabel, { color: colors.mutedForeground }]}>
-                  {t(language, 'totalPrice')}
-                </Text>
-                <Text style={[styles.totalMeta, { color: colors.mutedForeground }]}>
-                  {areaNum} {workType.unit} × {priceNum} {country?.currencySymbol}
-                </Text>
-              </View>
-              <View style={styles.totalAmountWrap}>
-                <Text style={[styles.totalValue, { color: colors.foreground }]}>{fmtTotal}</Text>
-                <Text style={[styles.totalCurrency, { color: colors.primary }]}>{country?.currencySymbol}</Text>
+              <View style={[styles.totalsBlock, { borderTopColor: colors.border }]}>
+                <View style={styles.totalRow}>
+                  <Text style={[styles.totalLabel, { color: colors.mutedForeground }]}>{t(language, 'totalNet')}</Text>
+                  <Text style={[styles.totalValue, { color: colors.foreground }]}>
+                    {totalNet.toLocaleString('pl-PL', { maximumFractionDigits: 0 })} {sym}
+                  </Text>
+                </View>
+                {vatRate > 0 && (
+                  <View style={styles.totalRow}>
+                    <Text style={[styles.totalLabel, { color: colors.mutedForeground }]}>VAT {vatRate}%</Text>
+                    <Text style={[styles.totalValue, { color: colors.mutedForeground }]}>
+                      {totalVat.toLocaleString('pl-PL', { maximumFractionDigits: 0 })} {sym}
+                    </Text>
+                  </View>
+                )}
+                <View style={[styles.totalRow, styles.grossRow]}>
+                  <Text style={[styles.totalLabel, { color: colors.foreground, fontFamily: 'Inter_700Bold' }]}>
+                    {vatRate > 0 ? t(language, 'totalGross') : t(language, 'totalNet')}
+                  </Text>
+                  <Text style={[styles.grossValue, { color: colors.primary }]}>
+                    {totalGross.toLocaleString('pl-PL', { maximumFractionDigits: 0 })} {sym}
+                  </Text>
+                </View>
               </View>
             </View>
 
-            {/* Save & Print */}
-            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
-                {t(language, 'estimateLabel')}
-              </Text>
-              <TextInput
-                value={label}
-                onChangeText={setLabel}
-                placeholder={t(language, 'estimateLabelPlaceholder')}
-                placeholderTextColor={colors.mutedForeground}
-                style={[styles.labelInput, { color: colors.foreground, borderColor: colors.border }]}
-                returnKeyType="done"
-              />
+            {/* Actions */}
+            <View style={styles.actionsRow}>
               <Pressable
                 onPress={handleSave}
-                disabled={areaNum === 0}
                 style={({ pressed }) => [
                   styles.saveBtn,
-                  {
-                    backgroundColor: justSaved ? colors.success : colors.primary,
-                    opacity: pressed ? 0.85 : areaNum === 0 ? 0.45 : 1,
-                  },
+                  { backgroundColor: savedWycena ? colors.success : colors.primary, opacity: pressed ? 0.85 : 1 },
                 ]}
               >
-                <Ionicons name={justSaved ? 'checkmark-circle' : 'bookmark-outline'} size={18} color="#fff" />
+                <Ionicons name={savedWycena ? 'checkmark-circle' : 'save-outline'} size={18} color="#fff" />
                 <Text style={styles.saveBtnText}>
-                  {justSaved ? t(language, 'saved') : t(language, 'saveEstimate')}
+                  {savedWycena ? t(language, 'saved') : t(language, 'saveEstimate')}
                 </Text>
               </Pressable>
-
-              {lastSaved && (
-                <Pressable
-                  onPress={handlePrint}
-                  style={({ pressed }) => [
-                    styles.printBtn,
-                    { borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
-                  ]}
-                >
-                  <Ionicons name="print-outline" size={18} color={colors.foreground} />
-                  <Text style={[styles.printBtnText, { color: colors.foreground }]}>
-                    {t(language, 'printEstimate')}
-                  </Text>
-                </Pressable>
-              )}
+              <Pressable
+                onPress={handlePrint}
+                style={({ pressed }) => [
+                  styles.printBtn,
+                  { borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
+                ]}
+              >
+                <Ionicons name="print-outline" size={18} color={colors.foreground} />
+                <Text style={[styles.printBtnText, { color: colors.foreground }]}>{t(language, 'printEstimate')}</Text>
+              </Pressable>
             </View>
           </>
         )}
-
-        <View style={{ height: insets.bottom + 90 }} />
       </ScrollView>
-
-      {/* Country picker modal */}
-      <Modal
-        visible={showCountryPicker}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowCountryPicker(false)}
-      >
-        <View style={[styles.modalRoot, { backgroundColor: colors.background }]}>
-          <View style={[styles.modalHeader, { borderBottomColor: colors.border, paddingTop: insets.top + 12 }]}>
-            <Text style={[styles.modalTitle, { color: colors.foreground }]}>
-              {t(language, 'selectCountry')}
-            </Text>
-            <Pressable onPress={() => setShowCountryPicker(false)} hitSlop={8}>
-              <Ionicons name="close" size={24} color={colors.foreground} />
-            </Pressable>
-          </View>
-          <FlatList
-            data={COUNTRIES}
-            keyExtractor={(c) => c.code}
-            renderItem={({ item: c }) => {
-              const selected = c.code === countryCode;
-              return (
-                <Pressable
-                  onPress={() => {
-                    setCountryCode(c.code);
-                    setShowCountryPicker(false);
-                  }}
-                  style={({ pressed }) => [
-                    styles.countryRow,
-                    {
-                      backgroundColor: selected ? colors.accent : pressed ? colors.secondary : colors.card,
-                      borderColor: selected ? colors.primary : colors.border,
-                    },
-                  ]}
-                >
-                  <View style={[styles.codeBox, { backgroundColor: selected ? colors.primary : colors.secondary }]}>
-                    <Text style={[styles.codeBoxText, { color: selected ? '#fff' : colors.foreground }]}>
-                      {c.code}
-                    </Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.countryName, { color: colors.foreground }]}>
-                      {getCountryName(c, language)}
-                    </Text>
-                    <Text style={[styles.countryCurrency, { color: colors.mutedForeground }]}>
-                      {c.currencyCode} · {c.currencySymbol}
-                    </Text>
-                  </View>
-                  {selected && <Ionicons name="checkmark" size={18} color={colors.primary} />}
-                </Pressable>
-              );
-            }}
-            contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 24 }}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
-      </Modal>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   scroll: { paddingHorizontal: 16 },
-  pageHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 10 },
-  pageTitle: { flex: 1, fontSize: 26, fontFamily: 'Inter_700Bold' },
-  countryPill: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 10, paddingVertical: 6, borderRadius: 20, borderWidth: 1, gap: 5,
-  },
-  pillCode: { fontSize: 13, fontFamily: 'Inter_700Bold' },
-  pillSymbol: { fontSize: 12, fontFamily: 'Inter_500Medium' },
-  workTypeBtn: {
-    flexDirection: 'row', alignItems: 'center',
-    padding: 16, borderRadius: 14, borderWidth: 2, gap: 12, marginBottom: 14, minHeight: 80,
-  },
-  wtIcon: { width: 50, height: 50, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
-  wtTextWrap: { flex: 1 },
-  wtName: { fontSize: 15, fontFamily: 'Inter_600SemiBold', lineHeight: 20 },
-  wtUnit: { fontSize: 12, fontFamily: 'Inter_400Regular', marginTop: 2 },
-  changeText: { fontSize: 12, fontFamily: 'Inter_600SemiBold' },
-  selectText: { flex: 1, fontSize: 16, fontFamily: 'Inter_600SemiBold' },
-  noRate: {
-    flexDirection: 'row', alignItems: 'center',
-    padding: 12, borderRadius: 10, borderWidth: 1, gap: 8, marginBottom: 14,
-  },
-  noRateText: { fontSize: 13, fontFamily: 'Inter_400Regular', flex: 1 },
-  card: { padding: 16, borderRadius: 14, borderWidth: 1, marginTop: 12, gap: 10 },
-  cardLabel: { fontSize: 11, fontFamily: 'Inter_500Medium', textTransform: 'uppercase', letterSpacing: 0.5 },
+
+  pageHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 14, gap: 10 },
+  pageTitle:  { fontSize: 22, fontFamily: 'Inter_700Bold' },
+  pageCountry:{ fontSize: 12, fontFamily: 'Inter_400Regular', marginTop: 1 },
+  newBtn:     { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5 },
+  newBtnText: { fontSize: 11, fontFamily: 'Inter_500Medium' },
+
+  clientToggle: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 10, borderWidth: 1, marginBottom: 8 },
+  clientToggleText: { flex: 1, fontSize: 14, fontFamily: 'Inter_400Regular' },
+  clientForm:  { padding: 12, borderRadius: 10, borderWidth: 1, marginBottom: 8, gap: 8 },
+  clientInput: { height: 42, borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, fontSize: 14, fontFamily: 'Inter_400Regular' },
+
+  positionsCard: { borderRadius: 14, borderWidth: 1, marginBottom: 10, padding: 14, gap: 0 },
+  sectionLabel:  { fontSize: 10, fontFamily: 'Inter_600SemiBold', textTransform: 'uppercase', letterSpacing: 0.7, marginBottom: 8 },
+  posRow:  { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, gap: 8 },
+  posDivider: { height: 1 },
+  posNum:  { width: 20, fontSize: 12, fontFamily: 'Inter_500Medium', textAlign: 'center' },
+  posName: { fontSize: 13, fontFamily: 'Inter_600SemiBold' },
+  posMeta: { fontSize: 11, fontFamily: 'Inter_400Regular', marginTop: 1 },
+  posTotal:{ fontSize: 13, fontFamily: 'Inter_600SemiBold', minWidth: 72, textAlign: 'right' },
+
+  pendingCard: { borderRadius: 14, borderWidth: 2, marginBottom: 10, padding: 14, gap: 12 },
+  pendingHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  pendingWTName: { flex: 1, fontSize: 15, fontFamily: 'Inter_600SemiBold' },
+  changeLink:    { fontSize: 12, fontFamily: 'Inter_600SemiBold' },
+  rateHint:      { fontSize: 11, fontFamily: 'Inter_400Regular', marginTop: -6 },
+
   dimsRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 10 },
-  dimBox: { flex: 1, gap: 6 },
-  dimLabel: { fontSize: 12, fontFamily: 'Inter_500Medium' },
-  dimInput: {
-    height: 52, borderWidth: 1, borderRadius: 10,
-    paddingHorizontal: 12, fontSize: 22, fontFamily: 'Inter_700Bold', textAlign: 'center',
-  },
-  dimMul: { fontSize: 24, fontFamily: 'Inter_700Bold', paddingBottom: 12 },
-  dimResult: { paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
-  dimResultText: { fontSize: 18, fontFamily: 'Inter_700Bold' },
-  dimOr: { fontSize: 12, fontFamily: 'Inter_400Regular', textAlign: 'center', marginTop: 2 },
-  areaRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  stepBtn: { width: 46, height: 46, borderRadius: 10, borderWidth: 1, justifyContent: 'center', alignItems: 'center' },
-  areaInput: {
-    flex: 1, textAlign: 'center', fontSize: 30, fontFamily: 'Inter_700Bold',
-    height: 56, borderWidth: 1, borderRadius: 10,
-  },
-  quickRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  quickBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1 },
-  quickBtnText: { fontSize: 13, fontFamily: 'Inter_500Medium' },
-  priceInput: {
-    fontSize: 24, fontFamily: 'Inter_700Bold', height: 54,
-    borderWidth: 1, borderRadius: 10, paddingHorizontal: 14, textAlign: 'center',
-  },
-  rangeHint: { fontSize: 12, fontFamily: 'Inter_400Regular', textAlign: 'center', marginTop: -4 },
-  totalCard: {
-    flexDirection: 'row', alignItems: 'center',
-    borderWidth: 1, borderRadius: 14, marginTop: 12,
-    overflow: 'hidden',
-  },
-  totalAccent: { width: 3, alignSelf: 'stretch' },
-  totalInner: { flex: 1, paddingVertical: 16, paddingHorizontal: 14, gap: 3 },
-  totalLabel: { fontSize: 10, fontFamily: 'Inter_600SemiBold', textTransform: 'uppercase', letterSpacing: 0.8 },
-  totalMeta: { fontSize: 12, fontFamily: 'Inter_400Regular' },
-  totalAmountWrap: { flexDirection: 'row', alignItems: 'baseline', paddingRight: 16, gap: 4 },
-  totalValue: { fontSize: 32, fontFamily: 'Inter_700Bold' },
-  totalCurrency: { fontSize: 16, fontFamily: 'Inter_600SemiBold' },
-  labelInput: { height: 46, borderWidth: 1, borderRadius: 10, paddingHorizontal: 14, fontSize: 15, fontFamily: 'Inter_400Regular' },
-  saveBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 52, borderRadius: 12, gap: 8 },
-  saveBtnText: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: '#fff' },
-  printBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    height: 46, borderRadius: 12, borderWidth: 1.5, gap: 8,
-  },
-  printBtnText: { fontSize: 15, fontFamily: 'Inter_600SemiBold' },
-  modalRoot: { flex: 1 },
-  modalHeader: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 18, paddingBottom: 14, borderBottomWidth: 1,
-  },
-  modalTitle: { fontSize: 18, fontFamily: 'Inter_700Bold' },
-  countryRow: {
-    flexDirection: 'row', alignItems: 'center',
-    padding: 14, borderRadius: 12, borderWidth: 1.5, marginBottom: 8, gap: 12,
-  },
-  codeBox: { width: 46, height: 46, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
-  codeBoxText: { fontSize: 13, fontFamily: 'Inter_700Bold' },
-  countryName: { fontSize: 15, fontFamily: 'Inter_600SemiBold' },
-  countryCurrency: { fontSize: 12, fontFamily: 'Inter_400Regular', marginTop: 2 },
+  dimCol:  { flex: 1, gap: 4 },
+  dimLabel:{ fontSize: 11, fontFamily: 'Inter_500Medium' },
+  dimInput:{ height: 48, borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, fontSize: 20, fontFamily: 'Inter_700Bold', textAlign: 'center' },
+  dimMul:  { fontSize: 22, fontFamily: 'Inter_700Bold', paddingBottom: 10 },
+  dimResult: { paddingVertical: 8, borderRadius: 8, alignItems: 'center' },
+  dimResultText: { fontSize: 16, fontFamily: 'Inter_700Bold' },
+
+  apRow:   { flexDirection: 'row', gap: 10 },
+  apCol:   { flex: 1, gap: 4 },
+  apInput: { height: 48, borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, fontSize: 18, fontFamily: 'Inter_700Bold', textAlign: 'center' },
+
+  rowTotalBar:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, paddingTop: 10, marginTop: -4 },
+  rowTotalLabel: { fontSize: 12, fontFamily: 'Inter_400Regular' },
+  rowTotalValue: { fontSize: 16, fontFamily: 'Inter_700Bold' },
+
+  addPosBtn:     { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', height: 48, borderRadius: 10, gap: 6 },
+  addPosBtnText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: '#fff' },
+
+  addBtn:     { flexDirection: 'row', alignItems: 'center', borderWidth: 2, borderStyle: 'dashed', borderRadius: 14, padding: 16, gap: 12, marginBottom: 10 },
+  addBtnIcon: { width: 44, height: 44, borderRadius: 11, justifyContent: 'center', alignItems: 'center' },
+  addBtnText: { fontSize: 16, fontFamily: 'Inter_600SemiBold' },
+
+  summaryCard:  { borderRadius: 14, borderWidth: 1, padding: 14, marginBottom: 10, gap: 12 },
+  vatRow:       { flexDirection: 'row', gap: 8 },
+  vatChip:      { flex: 1, height: 38, borderRadius: 8, borderWidth: 1.5, justifyContent: 'center', alignItems: 'center' },
+  vatChipText:  { fontSize: 13, fontFamily: 'Inter_600SemiBold' },
+  totalsBlock:  { borderTopWidth: 1, paddingTop: 12, gap: 6 },
+  totalRow:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  totalLabel:   { fontSize: 14, fontFamily: 'Inter_400Regular' },
+  totalValue:   { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
+  grossRow:     { marginTop: 4, paddingTop: 8, borderTopWidth: 1, borderTopColor: 'transparent' },
+  grossValue:   { fontSize: 24, fontFamily: 'Inter_700Bold' },
+
+  actionsRow:   { flexDirection: 'row', gap: 10, marginBottom: 8 },
+  saveBtn:      { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 50, borderRadius: 12, gap: 7 },
+  saveBtnText:  { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: '#fff' },
+  printBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 50, borderRadius: 12, borderWidth: 1.5, paddingHorizontal: 16, gap: 6 },
+  printBtnText: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
 });

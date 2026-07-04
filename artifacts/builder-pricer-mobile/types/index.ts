@@ -25,6 +25,36 @@ export interface PriceRate {
   max: number;
 }
 
+/** One line item inside a Wycena document */
+export interface WycenaPosition {
+  id: string;
+  workTypeId: string;
+  workTypeName: string;
+  workTypeIconName: string;
+  workTypeUnit: string;
+  area: number;
+  pricePerUnit: number;
+  totalPrice: number;
+}
+
+/** A complete estimate document (kosztorys) */
+export interface Wycena {
+  id: string;
+  number: number;        // sequential #1, #2, …
+  createdAt: string;
+  clientName: string;
+  clientAddress: string;
+  countryCode: string;
+  currencyCode: string;
+  currencySymbol: string;
+  positions: WycenaPosition[];
+  totalNet: number;
+  vatRate: number;       // 0 | 8 | 23 (percent)
+  totalVat: number;
+  totalGross: number;
+}
+
+/** @deprecated Use Wycena / WycenaPosition instead */
 export interface Estimate {
   id: string;
   workTypeId: string;
