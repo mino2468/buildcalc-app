@@ -25,9 +25,15 @@ async function fetchRates() {
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
   if (!apiUrl) return;
   try {
-    const res = await fetch(`${apiUrl}/api/rates`, {
-      signal: AbortSignal.timeout(6000),
-    });
+    // AbortSignal.timeout is not available on all Android/Hermes versions — use AbortController
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6000);
+    let res: Response;
+    try {
+      res = await fetch(`${apiUrl}/api/rates`, { signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+    }
     if (!res.ok) return;
     const data = await res.json();
     if (Array.isArray(data.rates)) setRatesFromServer(data.rates);
