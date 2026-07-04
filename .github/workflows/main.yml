@@ -1,4 +1,4 @@
-name: Build Android APK (Expo Monorepo pnpm 9)
+name: Build Android APK (Expo Monorepo)
 
 on:
   push:
@@ -34,19 +34,26 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Prebuild Expo
-        run: pnpm exec expo prebuild --platform android --no-install
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x android/gradlew
+      - name: Detect App Directory and Prebuild
+        run: |
+          # Szukamy folderu, w którym jest app.json (omijając node_modules)
+          APP_PATH=$(find . -name "app.json" -not -path "*/node_modules/*" -exec dirname {} \; | head -n 1)
+          echo "Znaleziono aplikację w: $APP_PATH"
+          echo "APP_DIR=$APP_PATH" >> $GITHUB_ENV
+          
+          cd $APP_PATH
+          # Używamy npx, który wewnątrz pnpm monorepo lepiej radzi sobie ze ścieżkami
+          npx expo prebuild --platform android --no-install
 
       - name: Build Debug APK
         run: |
-          cd android
+          cd ${{ env.APP_DIR }}/android
+          chmod +x gradlew
           ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: MojaApka-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          # Szukamy pliku APK dynamicznie, bo ścieżka w monorepo może być inna
+          path: "**/build/outputs/apk/debug/app-debug.apk"
