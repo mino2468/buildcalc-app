@@ -187,10 +187,13 @@ export default function WorkTypeSelectScreen() {
         />
       </View>
 
-      {/* Category grid OR item list */}
+      {/* Category grid OR item list.
+          Each FlatList gets a stable key so React fully remounts when
+          switching modes — required because numColumns cannot change on the fly. */}
       {!isSearching && !selectedCat ? (
         /* ── Step 1: Category grid ── */
         <FlatList
+          key="category-grid"
           data={categories}
           keyExtractor={(c) => c.slug}
           renderItem={renderCategoryCard}
@@ -206,6 +209,7 @@ export default function WorkTypeSelectScreen() {
       ) : (
         /* ── Step 2: Work item list (selected category or search results) ── */
         <FlatList
+          key="item-list"
           data={visibleItems}
           keyExtractor={(wt) => wt.id}
           renderItem={renderWorkItem}

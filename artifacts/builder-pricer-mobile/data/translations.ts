@@ -54,6 +54,7 @@ type TranslationKeys = {
   positions: string; positionCount: string;
   // linear / count measurement types
   quantity: string;
+  remove: string;
   categories: {
     // current 13-category catalog
     prep: string; 'walls-ceilings': string; drywall: string;
@@ -103,7 +104,7 @@ const translations: Record<Language, TranslationKeys> = {
     vatRate: 'VAT', noVat: 'Bez VAT', totalNet: 'Razem netto', totalGross: 'Razem brutto',
     estimateNo: 'Kosztorys', noPositions: 'Brak pozycji', clearEstimate: 'Nowy dokument',
     positions: 'Pozycje', positionCount: 'poz.',
-    quantity: 'Ilość',
+    quantity: 'Ilość', remove: 'Usuń',
     categories: {
       prep: 'Prace przygotowawcze', 'walls-ceilings': 'Ściany i sufity',
       drywall: 'Zabudowy GK i sufity', flooring: 'Podłogi',
@@ -151,7 +152,7 @@ const translations: Record<Language, TranslationKeys> = {
     vatRate: 'VAT', noVat: 'No VAT', totalNet: 'Total net', totalGross: 'Total gross',
     estimateNo: 'Estimate', noPositions: 'No positions', clearEstimate: 'New document',
     positions: 'Positions', positionCount: 'pos.',
-    quantity: 'Quantity',
+    quantity: 'Quantity', remove: 'Remove',
     categories: {
       prep: 'Preparation', 'walls-ceilings': 'Walls & Ceilings',
       drywall: 'Drywall & Ceilings', flooring: 'Flooring',
@@ -199,7 +200,7 @@ const translations: Record<Language, TranslationKeys> = {
     vatRate: 'MwSt.', noVat: 'Ohne MwSt.', totalNet: 'Netto gesamt', totalGross: 'Brutto gesamt',
     estimateNo: 'Angebot', noPositions: 'Keine Positionen', clearEstimate: 'Neues Dokument',
     positions: 'Positionen', positionCount: 'Pos.',
-    quantity: 'Menge',
+    quantity: 'Menge', remove: 'Entfernen',
     categories: {
       prep: 'Vorbereitung', 'walls-ceilings': 'Wände & Decken',
       drywall: 'Trockenbau & Decken', flooring: 'Böden',
@@ -247,7 +248,7 @@ const translations: Record<Language, TranslationKeys> = {
     vatRate: 'TVA', noVat: 'Sans TVA', totalNet: 'Total HT', totalGross: 'Total TTC',
     estimateNo: 'Devis', noPositions: 'Aucun poste', clearEstimate: 'Nouveau document',
     positions: 'Postes', positionCount: 'postes',
-    quantity: 'Quantité',
+    quantity: 'Quantité', remove: 'Supprimer',
     categories: {
       prep: 'Préparation', 'walls-ceilings': 'Murs et Plafonds',
       drywall: 'Plaques de plâtre', flooring: 'Sols',
@@ -295,7 +296,7 @@ const translations: Record<Language, TranslationKeys> = {
     vatRate: 'ПДВ', noVat: 'Без ПДВ', totalNet: 'Разом без ПДВ', totalGross: 'Разом з ПДВ',
     estimateNo: 'Кошторис', noPositions: 'Немає позицій', clearEstimate: 'Новий документ',
     positions: 'Позиції', positionCount: 'поз.',
-    quantity: 'Кількість',
+    quantity: 'Кількість', remove: 'Видалити',
     categories: {
       prep: 'Підготовчі роботи', 'walls-ceilings': 'Стіни і стелі',
       drywall: 'Гіпсокартон і стелі', flooring: 'Підлога',
@@ -343,7 +344,7 @@ const translations: Record<Language, TranslationKeys> = {
     vatRate: 'IVA', noVat: 'Sin IVA', totalNet: 'Total sin IVA', totalGross: 'Total con IVA',
     estimateNo: 'Presupuesto', noPositions: 'Sin partidas', clearEstimate: 'Nuevo documento',
     positions: 'Partidas', positionCount: 'part.',
-    quantity: 'Cantidad',
+    quantity: 'Cantidad', remove: 'Eliminar',
     categories: {
       prep: 'Preparación', 'walls-ceilings': 'Paredes y Techos',
       drywall: 'Pladur y Techos', flooring: 'Suelos',
@@ -391,7 +392,7 @@ const translations: Record<Language, TranslationKeys> = {
     vatRate: 'DPH', noVat: 'Bez DPH', totalNet: 'Celkem bez DPH', totalGross: 'Celkem s DPH',
     estimateNo: 'Kalkulace', noPositions: 'Žádné položky', clearEstimate: 'Nový dokument',
     positions: 'Položky', positionCount: 'pol.',
-    quantity: 'Množství',
+    quantity: 'Množství', remove: 'Odebrat',
     categories: {
       prep: 'Přípravné práce', 'walls-ceilings': 'Stěny a stropy',
       drywall: 'Sádrokarton a stropy', flooring: 'Podlahy',

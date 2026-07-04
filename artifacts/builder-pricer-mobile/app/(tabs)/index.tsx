@@ -427,7 +427,7 @@ export default function CalculatorScreen() {
                       Stawka {typedPrice} {sym}/{pendingWT.unit} zapisana
                     </Text>
                     <Pressable onPress={handleUnsavePrice} hitSlop={8} style={styles.unsaveBtn}>
-                      <Text style={[styles.unsaveBtnText, { color: colors.mutedForeground }]}>Usuń</Text>
+                      <Text style={[styles.unsaveBtnText, { color: colors.mutedForeground }]}>{t(language, 'remove')}</Text>
                     </Pressable>
                   </>
                 ) : (

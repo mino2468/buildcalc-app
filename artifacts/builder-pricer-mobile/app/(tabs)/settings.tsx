@@ -188,7 +188,7 @@ export default function SettingsScreen() {
                 </Text>
                 {company.logoUri && (
                   <Pressable onPress={() => updateCompany({ logoUri: '' })}>
-                    <Text style={[styles.rowSecondary, { color: colors.destructive }]}>✕ Usuń</Text>
+                    <Text style={[styles.rowSecondary, { color: colors.destructive }]}>✕ {t(language, 'remove')}</Text>
                   </Pressable>
                 )}
               </View>
