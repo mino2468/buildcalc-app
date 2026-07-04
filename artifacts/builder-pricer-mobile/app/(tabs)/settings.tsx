@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import {
   Alert,
   Image,
@@ -20,11 +20,13 @@ import { useApp } from '@/context/AppContext';
 import { useCompany } from '@/context/CompanyContext';
 import { useColors } from '@/hooks/useColors';
 import { LANGUAGES, t } from '@/data/translations';
-import { CURRENCIES, getCurrencyName } from '@/data/currencies';
+import { COUNTRIES, getCountryName } from '@/data/countries';
 import type { Language } from '@/types';
 
+type Colors = ReturnType<typeof useColors>;
+
 export default function SettingsScreen() {
-  const { language, currencyCode, setLanguage, setCurrencyCode } = useApp();
+  const { language, countryCode, setLanguage, setCountryCode } = useApp();
   const { company, updateCompany } = useCompany();
   const navigation = useNavigation();
   const colors = useColors();
@@ -41,9 +43,9 @@ export default function SettingsScreen() {
     await setLanguage(lang);
   };
 
-  const handleCurrency = async (code: string) => {
+  const handleCountry = async (code: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await setCurrencyCode(code);
+    await setCountryCode(code);
   };
 
   const handlePickLogo = async () => {
@@ -114,31 +116,33 @@ export default function SettingsScreen() {
         </View>
       </View>
 
-      {/* Currency section */}
+      {/* Country / price rates section */}
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>
-          {t(language, 'currency').toUpperCase()}
+          {t(language, 'country').toUpperCase()}
         </Text>
         <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          {CURRENCIES.map((c, idx) => {
-            const selected = c.code === currencyCode;
+          {COUNTRIES.map((c, idx) => {
+            const selected = c.code === countryCode;
             return (
               <React.Fragment key={c.code}>
                 {idx > 0 && <View style={[styles.divider, { backgroundColor: colors.border }]} />}
                 <Pressable
-                  onPress={() => handleCurrency(c.code)}
+                  onPress={() => handleCountry(c.code)}
                   style={({ pressed }) => [styles.row, { backgroundColor: pressed ? colors.secondary : 'transparent' }]}
                 >
                   <View style={styles.rowLeft}>
                     <View style={[styles.badge, { backgroundColor: selected ? colors.primary : colors.secondary }]}>
-                      <Text style={[styles.badgeText, { color: selected ? '#fff' : colors.mutedForeground, fontSize: 13 }]}>
-                        {c.symbol}
+                      <Text style={[styles.badgeText, { color: selected ? '#fff' : colors.mutedForeground }]}>
+                        {c.code}
                       </Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.rowPrimary, { color: colors.foreground }]}>{c.code}</Text>
-                      <Text style={[styles.rowSecondary, { color: colors.mutedForeground }]} numberOfLines={1}>
-                        {getCurrencyName(c, language)}
+                      <Text style={[styles.rowPrimary, { color: colors.foreground }]}>
+                        {getCountryName(c, language)}
+                      </Text>
+                      <Text style={[styles.rowSecondary, { color: colors.mutedForeground }]}>
+                        {c.currencyCode} · {c.currencySymbol}
                       </Text>
                     </View>
                   </View>
@@ -184,9 +188,7 @@ export default function SettingsScreen() {
               </Text>
               {company.logoUri && (
                 <Pressable onPress={() => updateCompany({ logoUri: '' })}>
-                  <Text style={[styles.rowSecondary, { color: colors.destructive }]}>
-                    {t(language, 'confirm')} ✕
-                  </Text>
+                  <Text style={[styles.rowSecondary, { color: colors.destructive }]}>✕ Usuń</Text>
                 </Pressable>
               )}
             </View>
@@ -194,50 +196,26 @@ export default function SettingsScreen() {
 
           <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
-          {/* Company name */}
-          <CompanyField
-            label={t(language, 'companyName')}
-            value={company.name}
+          <CompanyField label={t(language, 'companyName')} value={company.name}
             placeholder={t(language, 'companyNamePlaceholder')}
-            onChangeText={(v) => updateCompany({ name: v })}
-            colors={colors}
-            icon="business-outline"
-          />
+            onChangeText={(v) => updateCompany({ name: v })} colors={colors} icon="business-outline" />
           <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
-          {/* Address */}
-          <CompanyField
-            label={t(language, 'companyAddress')}
-            value={company.address}
+          <CompanyField label={t(language, 'companyAddress')} value={company.address}
             placeholder={t(language, 'companyAddressPlaceholder')}
-            onChangeText={(v) => updateCompany({ address: v })}
-            colors={colors}
-            icon="location-outline"
-          />
+            onChangeText={(v) => updateCompany({ address: v })} colors={colors} icon="location-outline" />
           <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
-          {/* Phone */}
-          <CompanyField
-            label={t(language, 'companyPhone')}
-            value={company.phone}
+          <CompanyField label={t(language, 'companyPhone')} value={company.phone}
             placeholder={t(language, 'companyPhonePlaceholder')}
-            onChangeText={(v) => updateCompany({ phone: v })}
-            colors={colors}
-            icon="call-outline"
-            keyboardType="phone-pad"
-          />
+            onChangeText={(v) => updateCompany({ phone: v })} colors={colors} icon="call-outline"
+            keyboardType="phone-pad" />
           <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
-          {/* Email */}
-          <CompanyField
-            label={t(language, 'companyEmail')}
-            value={company.email}
+          <CompanyField label={t(language, 'companyEmail')} value={company.email}
             placeholder={t(language, 'companyEmailPlaceholder')}
-            onChangeText={(v) => updateCompany({ email: v })}
-            colors={colors}
-            icon="mail-outline"
-            keyboardType="email-address"
-          />
+            onChangeText={(v) => updateCompany({ email: v })} colors={colors} icon="mail-outline"
+            keyboardType="email-address" />
         </View>
       </View>
 
@@ -261,7 +239,7 @@ export default function SettingsScreen() {
           <View style={[styles.divider, { backgroundColor: colors.border }]} />
           <View style={styles.row}>
             <Text style={[styles.rowSecondary, { color: colors.mutedForeground }]}>
-              15 work types · 8 currencies · 7 languages
+              15 · 13 {t(language, 'country').toLowerCase()} · 7 {t(language, 'language').toLowerCase()}
             </Text>
           </View>
         </View>
@@ -270,11 +248,7 @@ export default function SettingsScreen() {
   );
 }
 
-type Colors = ReturnType<typeof useColors>;
-
-function CompanyField({
-  label, value, placeholder, onChangeText, colors, icon, keyboardType = 'default',
-}: {
+function CompanyField({ label, value, placeholder, onChangeText, colors, icon, keyboardType = 'default' }: {
   label: string; value: string; placeholder: string;
   onChangeText: (v: string) => void; colors: Colors; icon: string; keyboardType?: KeyboardTypeOptions;
 }) {
@@ -314,9 +288,8 @@ const styles = StyleSheet.create({
   rowPrimary: { fontSize: 15, fontFamily: 'Inter_500Medium' },
   rowSecondary: { fontSize: 12, fontFamily: 'Inter_400Regular', marginTop: 1 },
   badge: { width: 38, height: 38, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
-  badgeText: { fontSize: 12, fontFamily: 'Inter_700Bold' },
+  badgeText: { fontSize: 11, fontFamily: 'Inter_700Bold' },
   emptyCheck: { width: 20, height: 20, borderRadius: 10, borderWidth: 1.5 },
-  // Logo
   logoRow: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 14 },
   logoBox: {
     width: 72, height: 72, borderRadius: 12, borderWidth: 1.5, borderStyle: 'dashed',
@@ -324,11 +297,9 @@ const styles = StyleSheet.create({
   },
   logoImage: { width: 72, height: 72 },
   logoHint: { fontSize: 10, fontFamily: 'Inter_400Regular', marginTop: 4, textAlign: 'center' },
-  // Company fields
   companyFieldRow: { flexDirection: 'row', paddingHorizontal: 14, paddingVertical: 8, gap: 10, alignItems: 'flex-start' },
   fieldLabel: { fontSize: 10, fontFamily: 'Inter_500Medium', textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 2 },
   fieldInput: { fontSize: 15, fontFamily: 'Inter_400Regular', paddingVertical: 4 },
-  // About
   aboutRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 14, gap: 12 },
   appIcon: { width: 40, height: 40, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   appIconText: { fontSize: 22, fontFamily: 'Inter_700Bold', color: '#fff' },

@@ -13,7 +13,7 @@ export const LANGUAGES: { code: Language; label: string; nativeName: string }[] 
 type TranslationKeys = {
   calculator: string; history: string; settings: string;
   selectWorkType: string; changeWorkType: string;
-  selectCurrency: string; currency: string;
+  selectCurrency: string; currency: string; selectCountry: string; country: string;
   area: string; pricePerUnit: string; totalPrice: string;
   suggestedPrice: string; priceRange: string;
   saveEstimate: string; estimateLabel: string; estimateLabelPlaceholder: string;
@@ -48,7 +48,7 @@ const translations: Record<Language, TranslationKeys> = {
   pl: {
     calculator: 'Kalkulator', history: 'Historia', settings: 'Ustawienia',
     selectWorkType: 'Wybierz rodzaj pracy', changeWorkType: 'Zmień rodzaj pracy',
-    selectCurrency: 'Wybierz walutę', currency: 'Waluta',
+    selectCurrency: 'Wybierz walutę', currency: 'Waluta', selectCountry: 'Wybierz kraj', country: 'Kraj',
     area: 'Powierzchnia (m²)', pricePerUnit: 'Cena za m²', totalPrice: 'Łączna cena',
     suggestedPrice: 'Sugerowana cena', priceRange: 'Przedział cenowy',
     saveEstimate: 'Zapisz wycenę', estimateLabel: 'Nazwa wyceny',
@@ -73,7 +73,7 @@ const translations: Record<Language, TranslationKeys> = {
     companyAddressPlaceholder: 'ul. Przykładowa 1, 00-000 Warszawa',
     companyPhonePlaceholder: '+48 123 456 789',
     companyEmailPlaceholder: 'kontakt@firma.pl',
-    clearAll: 'Wyczyść wszystko', ratesOnline: 'Stawki aktualne (online)', savedCount: 'zapisanych', savedCount: 'zapisanych',
+    clearAll: 'Wyczyść wszystko', ratesOnline: 'Stawki aktualne (online)', savedCount: 'zapisanych',
     categories: {
       flooring: 'Podłogi', walls: 'Ściany', painting: 'Malowanie',
       roofing: 'Dach', insulation: 'Ocieplenie', electrical: 'Elektryka', plumbing: 'Hydraulika',
@@ -82,7 +82,7 @@ const translations: Record<Language, TranslationKeys> = {
   en: {
     calculator: 'Calculator', history: 'History', settings: 'Settings',
     selectWorkType: 'Select work type', changeWorkType: 'Change work type',
-    selectCurrency: 'Select currency', currency: 'Currency',
+    selectCurrency: 'Select currency', currency: 'Currency', selectCountry: 'Select country', country: 'Country',
     area: 'Area (m²)', pricePerUnit: 'Price per m²', totalPrice: 'Total price',
     suggestedPrice: 'Suggested price', priceRange: 'Price range',
     saveEstimate: 'Save estimate', estimateLabel: 'Estimate label',
@@ -116,7 +116,7 @@ const translations: Record<Language, TranslationKeys> = {
   de: {
     calculator: 'Kalkulator', history: 'Verlauf', settings: 'Einstellungen',
     selectWorkType: 'Arbeitsart wählen', changeWorkType: 'Arbeitsart ändern',
-    selectCurrency: 'Währung wählen', currency: 'Währung',
+    selectCurrency: 'Währung wählen', currency: 'Währung', selectCountry: 'Land wählen', country: 'Land',
     area: 'Fläche (m²)', pricePerUnit: 'Preis pro m²', totalPrice: 'Gesamtpreis',
     suggestedPrice: 'Empfohlener Preis', priceRange: 'Preisspanne',
     saveEstimate: 'Angebot speichern', estimateLabel: 'Bezeichnung',
@@ -150,7 +150,7 @@ const translations: Record<Language, TranslationKeys> = {
   fr: {
     calculator: 'Calculatrice', history: 'Historique', settings: 'Paramètres',
     selectWorkType: 'Choisir le type de travail', changeWorkType: 'Changer le type',
-    selectCurrency: 'Choisir la devise', currency: 'Devise',
+    selectCurrency: 'Choisir la devise', currency: 'Devise', selectCountry: 'Choisir le pays', country: 'Pays',
     area: 'Surface (m²)', pricePerUnit: 'Prix par m²', totalPrice: 'Prix total',
     suggestedPrice: 'Prix suggéré', priceRange: 'Fourchette de prix',
     saveEstimate: 'Enregistrer le devis', estimateLabel: 'Nom du devis',
@@ -184,7 +184,7 @@ const translations: Record<Language, TranslationKeys> = {
   uk: {
     calculator: 'Калькулятор', history: 'Історія', settings: 'Налаштування',
     selectWorkType: 'Вибрати тип роботи', changeWorkType: 'Змінити тип роботи',
-    selectCurrency: 'Вибрати валюту', currency: 'Валюта',
+    selectCurrency: 'Вибрати валюту', currency: 'Валюта', selectCountry: 'Вибрати країну', country: 'Країна',
     area: 'Площа (м²)', pricePerUnit: 'Ціна за м²', totalPrice: 'Загальна ціна',
     suggestedPrice: 'Рекомендована ціна', priceRange: 'Діапазон цін',
     saveEstimate: 'Зберегти кошторис', estimateLabel: 'Назва кошторису',
@@ -218,7 +218,7 @@ const translations: Record<Language, TranslationKeys> = {
   es: {
     calculator: 'Calculadora', history: 'Historial', settings: 'Ajustes',
     selectWorkType: 'Seleccionar tipo de trabajo', changeWorkType: 'Cambiar tipo de trabajo',
-    selectCurrency: 'Seleccionar moneda', currency: 'Moneda',
+    selectCurrency: 'Seleccionar moneda', currency: 'Moneda', selectCountry: 'Seleccionar país', country: 'País',
     area: 'Superficie (m²)', pricePerUnit: 'Precio por m²', totalPrice: 'Precio total',
     suggestedPrice: 'Precio sugerido', priceRange: 'Rango de precios',
     saveEstimate: 'Guardar presupuesto', estimateLabel: 'Nombre del presupuesto',
@@ -252,7 +252,7 @@ const translations: Record<Language, TranslationKeys> = {
   cs: {
     calculator: 'Kalkulačka', history: 'Historie', settings: 'Nastavení',
     selectWorkType: 'Vybrat typ práce', changeWorkType: 'Změnit typ práce',
-    selectCurrency: 'Vybrat měnu', currency: 'Měna',
+    selectCurrency: 'Vybrat měnu', currency: 'Měna', selectCountry: 'Vybrat zemi', country: 'Země',
     area: 'Plocha (m²)', pricePerUnit: 'Cena za m²', totalPrice: 'Celková cena',
     suggestedPrice: 'Doporučená cena', priceRange: 'Cenové rozpětí',
     saveEstimate: 'Uložit kalkulaci', estimateLabel: 'Název kalkulace',

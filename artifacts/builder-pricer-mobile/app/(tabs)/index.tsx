@@ -22,15 +22,15 @@ import { useEstimates } from '@/context/EstimatesContext';
 import { useColors } from '@/hooks/useColors';
 import { PriceDisplay } from '@/components/PriceDisplay';
 import { getWorkTypeById } from '@/data/workTypes';
-import { CURRENCIES, getCurrencyByCode, getCurrencyName } from '@/data/currencies';
-import { getPriceRateByCurrency } from '@/data/priceRates';
+import { COUNTRIES, getCountryByCode, getCountryName } from '@/data/countries';
+import { getPriceRate } from '@/data/priceRates';
 import { t } from '@/data/translations';
 import { getPendingWorkTypeId, setPendingWorkTypeId } from '@/utils/calcStore';
 import { printEstimate } from '@/utils/printEstimate';
 import type { Estimate } from '@/types';
 
 export default function CalculatorScreen() {
-  const { language, currencyCode, setCurrencyCode } = useApp();
+  const { language, countryCode, setCountryCode } = useApp();
   const { company } = useCompany();
   const { addEstimate } = useEstimates();
   const colors = useColors();
@@ -47,13 +47,13 @@ export default function CalculatorScreen() {
   const [area, setArea] = useState('');
   const [customPrice, setCustomPrice] = useState('');
   const [label, setLabel] = useState('');
-  const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [lastSaved, setLastSaved] = useState<Estimate | null>(null);
 
   const workType = workTypeId ? getWorkTypeById(workTypeId) : null;
-  const rate = workType ? getPriceRateByCurrency(workType.id, currencyCode) : null;
-  const currency = getCurrencyByCode(currencyCode);
+  const country = getCountryByCode(countryCode);
+  const rate = workType ? getPriceRate(workType.id, countryCode) : null;
 
   // Auto-calculate area when both dimensions are set
   useEffect(() => {
@@ -74,13 +74,22 @@ export default function CalculatorScreen() {
         setDim1('');
         setDim2('');
         setArea('');
-        const newRate = getPriceRateByCurrency(newId, currencyCode);
+        const newRate = getPriceRate(newId, countryCode);
         if (newRate) setCustomPrice(newRate.avg.toString());
         setJustSaved(false);
         setLastSaved(null);
       }
-    }, [currencyCode]),
+    }, [countryCode]),
   );
+
+  // When country changes, refresh the suggested price
+  useEffect(() => {
+    if (workTypeId) {
+      const newRate = getPriceRate(workTypeId, countryCode);
+      if (newRate) setCustomPrice(newRate.avg.toString());
+      else setCustomPrice('');
+    }
+  }, [countryCode, workTypeId]);
 
   const areaNum = parseFloat(area) || 0;
   const priceNum = customPrice !== '' ? (parseFloat(customPrice) || 0) : (rate?.avg ?? 0);
@@ -90,7 +99,7 @@ export default function CalculatorScreen() {
   const dim2Label = workType?.measurementType === 'wall' ? t(language, 'height') : t(language, 'width');
 
   const handleSave = () => {
-    if (!workType || !currency || areaNum === 0) return;
+    if (!workType || !country || areaNum === 0) return;
     const workTypeName =
       workType.translations[language]?.name ?? workType.translations['en']?.name ?? workType.slug;
     const est: Omit<Estimate, 'id' | 'createdAt'> = {
@@ -98,8 +107,8 @@ export default function CalculatorScreen() {
       workTypeName,
       workTypeIconName: workType.iconName,
       workTypeUnit: workType.unit,
-      currencyCode: currency.code,
-      currencySymbol: currency.symbol,
+      currencyCode: country.currencyCode,
+      currencySymbol: country.currencySymbol,
       area: areaNum,
       pricePerUnit: priceNum,
       totalPrice: total,
@@ -108,12 +117,7 @@ export default function CalculatorScreen() {
     addEstimate(est);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setJustSaved(true);
-    // Keep lastSaved for print
-    setLastSaved({
-      ...est,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-    });
+    setLastSaved({ ...est, id: Date.now().toString(), createdAt: new Date().toISOString() });
     setLabel('');
     setTimeout(() => setJustSaved(false), 3000);
   };
@@ -153,14 +157,16 @@ export default function CalculatorScreen() {
             {t(language, 'calculator')}
           </Text>
           <Pressable
-            onPress={() => setShowCurrencyPicker(true)}
+            onPress={() => setShowCountryPicker(true)}
             style={({ pressed }) => [
-              styles.currencyPill,
+              styles.countryPill,
               { backgroundColor: colors.secondary, borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
             ]}
           >
-            <Text style={[styles.currencySymbol, { color: colors.primary }]}>{currency?.symbol}</Text>
-            <Text style={[styles.currencyCode, { color: colors.mutedForeground }]}>{currencyCode}</Text>
+            <Text style={[styles.pillCode, { color: colors.primary }]}>{countryCode}</Text>
+            <Text style={[styles.pillSymbol, { color: colors.mutedForeground }]}>
+              {country?.currencySymbol}
+            </Text>
             <Ionicons name="chevron-down" size={13} color={colors.mutedForeground} />
           </Pressable>
         </View>
@@ -211,7 +217,7 @@ export default function CalculatorScreen() {
           <>
             {/* Market rate hint */}
             {rate ? (
-              <PriceDisplay rate={rate} lang={language} currencySymbol={currency?.symbol ?? ''} />
+              <PriceDisplay rate={rate} lang={language} currencySymbol={country?.currencySymbol ?? ''} />
             ) : (
               <View style={[styles.noRate, { backgroundColor: colors.secondary, borderColor: colors.border }]}>
                 <Ionicons name="information-circle-outline" size={18} color={colors.mutedForeground} />
@@ -324,7 +330,7 @@ export default function CalculatorScreen() {
             {/* Price per unit */}
             <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
-                {t(language, 'pricePerUnit')} ({currency?.symbol})
+                {t(language, 'pricePerUnit')} ({country?.currencySymbol})
               </Text>
               <TextInput
                 value={customPrice}
@@ -337,7 +343,7 @@ export default function CalculatorScreen() {
               />
               {rate && (
                 <Text style={[styles.rangeHint, { color: colors.mutedForeground }]}>
-                  {t(language, 'priceRange')}: {rate.min} – {rate.max} {currency?.symbol}
+                  {t(language, 'priceRange')}: {rate.min} – {rate.max} {country?.currencySymbol}
                 </Text>
               )}
             </View>
@@ -349,7 +355,7 @@ export default function CalculatorScreen() {
               </Text>
               <Text style={styles.totalValue}>
                 {fmtTotal}{' '}
-                <Text style={styles.totalCurrency}>{currency?.symbol}</Text>
+                <Text style={styles.totalCurrency}>{country?.currencySymbol}</Text>
               </Text>
             </View>
 
@@ -404,54 +410,52 @@ export default function CalculatorScreen() {
         <View style={{ height: insets.bottom + 90 }} />
       </ScrollView>
 
-      {/* Currency picker modal */}
+      {/* Country picker modal */}
       <Modal
-        visible={showCurrencyPicker}
+        visible={showCountryPicker}
         animationType="slide"
         presentationStyle="pageSheet"
-        onRequestClose={() => setShowCurrencyPicker(false)}
+        onRequestClose={() => setShowCountryPicker(false)}
       >
         <View style={[styles.modalRoot, { backgroundColor: colors.background }]}>
           <View style={[styles.modalHeader, { borderBottomColor: colors.border, paddingTop: insets.top + 12 }]}>
             <Text style={[styles.modalTitle, { color: colors.foreground }]}>
-              {t(language, 'selectCurrency')}
+              {t(language, 'selectCountry')}
             </Text>
-            <Pressable onPress={() => setShowCurrencyPicker(false)} hitSlop={8}>
+            <Pressable onPress={() => setShowCountryPicker(false)} hitSlop={8}>
               <Ionicons name="close" size={24} color={colors.foreground} />
             </Pressable>
           </View>
           <FlatList
-            data={CURRENCIES}
+            data={COUNTRIES}
             keyExtractor={(c) => c.code}
             renderItem={({ item: c }) => {
-              const selected = c.code === currencyCode;
+              const selected = c.code === countryCode;
               return (
                 <Pressable
                   onPress={() => {
-                    setCurrencyCode(c.code);
-                    if (workTypeId) {
-                      const r = getPriceRateByCurrency(workTypeId, c.code);
-                      if (r) setCustomPrice(r.avg.toString());
-                    }
-                    setShowCurrencyPicker(false);
+                    setCountryCode(c.code);
+                    setShowCountryPicker(false);
                   }}
                   style={({ pressed }) => [
-                    styles.currencyRow,
+                    styles.countryRow,
                     {
                       backgroundColor: selected ? colors.accent : pressed ? colors.secondary : colors.card,
                       borderColor: selected ? colors.primary : colors.border,
                     },
                   ]}
                 >
-                  <View style={[styles.currSymbolBox, { backgroundColor: selected ? colors.primary : colors.secondary }]}>
-                    <Text style={[styles.currSymbolBoxText, { color: selected ? '#fff' : colors.foreground }]}>
-                      {c.symbol}
+                  <View style={[styles.codeBox, { backgroundColor: selected ? colors.primary : colors.secondary }]}>
+                    <Text style={[styles.codeBoxText, { color: selected ? '#fff' : colors.foreground }]}>
+                      {c.code}
                     </Text>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={[styles.currRowCode, { color: colors.foreground }]}>{c.code}</Text>
-                    <Text style={[styles.currRowName, { color: colors.mutedForeground }]} numberOfLines={1}>
-                      {getCurrencyName(c, language)}
+                    <Text style={[styles.countryName, { color: colors.foreground }]}>
+                      {getCountryName(c, language)}
+                    </Text>
+                    <Text style={[styles.countryCurrency, { color: colors.mutedForeground }]}>
+                      {c.currencyCode} · {c.currencySymbol}
                     </Text>
                   </View>
                   {selected && <Ionicons name="checkmark" size={18} color={colors.primary} />}
@@ -471,12 +475,12 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: 16 },
   pageHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 10 },
   pageTitle: { flex: 1, fontSize: 26, fontFamily: 'Inter_700Bold' },
-  currencyPill: {
+  countryPill: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 10, paddingVertical: 6, borderRadius: 20, borderWidth: 1, gap: 5,
   },
-  currencySymbol: { fontSize: 14, fontFamily: 'Inter_700Bold' },
-  currencyCode: { fontSize: 11, fontFamily: 'Inter_500Medium' },
+  pillCode: { fontSize: 13, fontFamily: 'Inter_700Bold' },
+  pillSymbol: { fontSize: 12, fontFamily: 'Inter_500Medium' },
   workTypeBtn: {
     flexDirection: 'row', alignItems: 'center',
     padding: 16, borderRadius: 14, borderWidth: 2, gap: 12, marginBottom: 14, minHeight: 80,
@@ -494,7 +498,6 @@ const styles = StyleSheet.create({
   noRateText: { fontSize: 13, fontFamily: 'Inter_400Regular', flex: 1 },
   card: { padding: 16, borderRadius: 14, borderWidth: 1, marginTop: 12, gap: 10 },
   cardLabel: { fontSize: 11, fontFamily: 'Inter_500Medium', textTransform: 'uppercase', letterSpacing: 0.5 },
-  // Dimension calculator
   dimsRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 10 },
   dimBox: { flex: 1, gap: 6 },
   dimLabel: { fontSize: 12, fontFamily: 'Inter_500Medium' },
@@ -506,7 +509,6 @@ const styles = StyleSheet.create({
   dimResult: { paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
   dimResultText: { fontSize: 18, fontFamily: 'Inter_700Bold' },
   dimOr: { fontSize: 12, fontFamily: 'Inter_400Regular', textAlign: 'center', marginTop: 2 },
-  // Area
   areaRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   stepBtn: { width: 46, height: 46, borderRadius: 10, borderWidth: 1, justifyContent: 'center', alignItems: 'center' },
   areaInput: {
@@ -543,12 +545,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18, paddingBottom: 14, borderBottomWidth: 1,
   },
   modalTitle: { fontSize: 18, fontFamily: 'Inter_700Bold' },
-  currencyRow: {
+  countryRow: {
     flexDirection: 'row', alignItems: 'center',
     padding: 14, borderRadius: 12, borderWidth: 1.5, marginBottom: 8, gap: 12,
   },
-  currSymbolBox: { width: 44, height: 44, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
-  currSymbolBoxText: { fontSize: 16, fontFamily: 'Inter_700Bold' },
-  currRowCode: { fontSize: 16, fontFamily: 'Inter_700Bold' },
-  currRowName: { fontSize: 12, fontFamily: 'Inter_400Regular', marginTop: 2 },
+  codeBox: { width: 46, height: 46, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  codeBoxText: { fontSize: 13, fontFamily: 'Inter_700Bold' },
+  countryName: { fontSize: 15, fontFamily: 'Inter_600SemiBold' },
+  countryCurrency: { fontSize: 12, fontFamily: 'Inter_400Regular', marginTop: 2 },
 });

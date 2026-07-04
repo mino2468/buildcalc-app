@@ -14,8 +14,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '@/context/AppContext';
 import { useColors } from '@/hooks/useColors';
 import { LANGUAGES } from '@/data/translations';
-import { LANG_DEFAULT_CURRENCY } from '@/data/currencies';
 import type { Language } from '@/types';
+
+// Default country per UI language
+const LANG_DEFAULT_COUNTRY: Record<Language, string> = {
+  pl: 'PL',
+  en: 'GB',
+  de: 'DE',
+  fr: 'FR',
+  uk: 'UA',
+  es: 'ES',
+  cs: 'CZ',
+};
 
 const LANG_COLORS: Record<Language, string> = {
   pl: '#DC143C', en: '#003399', de: '#000000',
@@ -23,16 +33,16 @@ const LANG_COLORS: Record<Language, string> = {
 };
 
 export default function LanguageSelectScreen() {
-  const { setLanguage, setCurrencyCode } = useApp();
+  const { setLanguage, setCountryCode } = useApp();
   const colors = useColors();
   const insets = useSafeAreaInsets();
 
   const handleSelect = async (lang: Language) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const defaultCurrency = LANG_DEFAULT_CURRENCY[lang] ?? 'EUR';
+    const defaultCountry = LANG_DEFAULT_COUNTRY[lang] ?? 'PL';
     await Promise.all([
       setLanguage(lang),
-      setCurrencyCode(defaultCurrency),
+      setCountryCode(defaultCountry),
     ]);
     router.replace('/(tabs)');
   };
@@ -81,7 +91,7 @@ export default function LanguageSelectScreen() {
         </View>
 
         <Text style={[styles.hint, { color: colors.mutedForeground }]}>
-          You can change language later in Settings
+          You can change language and country later in Settings
         </Text>
       </ScrollView>
     </View>
